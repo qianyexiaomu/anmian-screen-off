@@ -1,0 +1,7 @@
+id=anmian_screen_off
+name=安眠[息屏管理]
+version=2.5
+versionCode=25
+updateJson=https://qianyexiaomu.github.io/anmian-screen-off/update.json
+author=Qian Ye
+description=为指定应用设置使用时限，连续无触摸操作时自动熄屏。支持 WebUI 配置，保存后 10 秒内生效。

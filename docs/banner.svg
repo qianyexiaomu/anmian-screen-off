@@ -1,0 +1,27 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="300" viewBox="0 0 1200 300" role="img" aria-label="安眠 息屏管理">
+  <rect width="1200" height="300" fill="#0F172A"/>
+  <circle cx="1060" cy="80" r="140" fill="#1E293B"/>
+  <circle cx="1060" cy="80" r="92" fill="#0F172A"/>
+
+  <text x="72" y="120" font-family="system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="56" font-weight="600" fill="#F8FAFC">安眠[息屏管理]</text>
+  <text x="74" y="168" font-family="system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="22" fill="#94A3B8">为指定应用设置使用时限 · Magisk / KernelSU / APatch</text>
+
+  <g font-family="system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="16" fill="#CBD5E1">
+    <rect x="74" y="200" width="168" height="38" rx="19" fill="#1E293B"/>
+    <text x="158" y="225" text-anchor="middle">无触摸自动熄屏</text>
+    <rect x="254" y="200" width="126" height="38" rx="19" fill="#1E293B"/>
+    <text x="317" y="225" text-anchor="middle">WebUI 配置</text>
+    <rect x="392" y="200" width="126" height="38" rx="19" fill="#1E293B"/>
+    <text x="455" y="225" text-anchor="middle">配置热重载</text>
+    <rect x="530" y="200" width="126" height="38" rx="19" fill="#1E293B"/>
+    <text x="593" y="225" text-anchor="middle">一键诊断</text>
+  </g>
+
+  <g transform="translate(1000 150)">
+    <rect x="-64" y="-96" width="128" height="192" rx="20" fill="#F8FAFC" opacity="0.08"/>
+    <rect x="-64" y="-96" width="128" height="192" rx="20" fill="none" stroke="#475569" stroke-width="2"/>
+    <rect x="-52" y="-84" width="104" height="150" rx="10" fill="#F8FAFC"/>
+    <path d="M-16 -40 a18 18 0 1 0 32 24 a24 24 0 1 1 -32 -24 z" fill="#334155"/>
+    <text x="0" y="96" text-anchor="middle" font-family="system-ui, 'PingFang SC', 'Microsoft YaHei', sans-serif" font-size="12" fill="#64748B">30:00</text>
+  </g>
+</svg>

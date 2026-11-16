@@ -1,13 +1,17 @@
 # package=包名，limit_time=时间（1m / 30s / 1h，不写单位按分钟，默认 30 分钟）
 
+# 抖音
 package=com.ss.android.ugc.aweme
 limit_time=30m
 
+# 抖音火山版
 package=com.ss.android.ugc.live
 limit_time=30m
 
+# 快手
 package=com.smile.gifmaker
 limit_time=30m
 
+# 快手极速版
 package=com.kuaishou.nebula
 limit_time=30m

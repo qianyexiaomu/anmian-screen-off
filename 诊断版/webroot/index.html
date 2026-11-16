@@ -828,6 +828,9 @@
     return (r.stdout || '').trim() === 'ok';
   }
 
+  /* 测试/诊断输出展示期间（30 秒内），定时刷新不要用守护进程日志把它覆盖掉 */
+  var logHoldUntil = 0;
+
   function refreshStatus() {
     if (!hasKsu()) return;
 
@@ -854,6 +857,8 @@
       $('statusText').textContent = '未运行';
       $('procInfo').textContent = '守护进程没有在跑，模块可能被禁用或启动失败';
     }
+
+    if (Date.now() < logHoldUntil) return;   /* 测试/诊断结果还在展示，先别刷日志 */
 
     var lg = sh("tail -n 12 '" + LOG + "' 2>/dev/null");
     var box = $('logBox');
@@ -883,10 +888,13 @@
       var out = (r.stdout || '').trim();
       var box = $('logBox');
       box.textContent = out || ('测试没有输出：' + (r.stderr || '未知错误'));
+      logHoldUntil = Date.now() + 30000;
       setLogCollapsed(false);
       requestAnimationFrame(function () { box.scrollTop = 0; });
       if (out.indexOf('息屏成功') >= 0) {
         setVerdict('息屏按键：可用（已实测）', 'ok');
+      } else if (out.indexOf('屏幕已经是熄灭的') >= 0) {
+        setVerdict('屏幕当前是熄灭的，点亮屏幕后再测', 'warn');
       } else if (out) {
         setVerdict('息屏按键：失败或被系统拦截', 'bad');
       }
@@ -914,8 +922,9 @@
       if (!out) {
         box.textContent = '诊断没有输出，检查 ' + tmp;
       } else {
-        box.textContent = out + '\n\n（完整输出已存到 ' + tmp + '）';
+        box.textContent = out + '\n\n（完整输出已存到 ' + tmp + '，模块目录「诊断」内另存一份，保留 7 天）';
       }
+      logHoldUntil = Date.now() + 30000;
       box.classList.add('full');
       setLogCollapsed(false);
       requestAnimationFrame(function () { box.scrollTop = 0; });

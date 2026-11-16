@@ -826,6 +826,9 @@
     return (r.stdout || '').trim() === 'ok';
   }
 
+  /* 测试/诊断输出展示期间（30 秒内），定时刷新不要用守护进程日志把它覆盖掉 */
+  var logHoldUntil = 0;
+
   function refreshStatus() {
     if (!hasKsu()) return;
 
@@ -852,6 +855,8 @@
       $('statusText').textContent = '未运行';
       $('procInfo').textContent = '守护进程没有在跑，模块可能被禁用或启动失败';
     }
+
+    if (Date.now() < logHoldUntil) return;   /* 测试/诊断结果还在展示，先别刷日志 */
 
     var lg = sh("tail -n 12 '" + LOG + "' 2>/dev/null");
     var box = $('logBox');
@@ -881,10 +886,13 @@
       var out = (r.stdout || '').trim();
       var box = $('logBox');
       box.textContent = out || ('测试没有输出：' + (r.stderr || '未知错误'));
+      logHoldUntil = Date.now() + 30000;
       setLogCollapsed(false);
       requestAnimationFrame(function () { box.scrollTop = 0; });
       if (out.indexOf('息屏成功') >= 0) {
         setVerdict('息屏按键：可用（已实测）', 'ok');
+      } else if (out.indexOf('屏幕已经是熄灭的') >= 0) {
+        setVerdict('屏幕当前是熄灭的，点亮屏幕后再测', 'warn');
       } else if (out) {
         setVerdict('息屏按键：失败或被系统拦截', 'bad');
       }
@@ -907,15 +915,25 @@
     var tmp = '/data/local/tmp/aso_diag.txt';
     setTimeout(function () {
       sh("'" + MOD + "/App_screen_off' --diag --config='" + CONFIG + "' > " + tmp + " 2>&1");
-      var line = (sh("grep -m1 '诊断结论' " + tmp + " 2>/dev/null").stdout || '').trim();
-      var m = /诊断结论:\s*(\S+)/.exec(line);
+      var out = (sh("cat " + tmp + " 2>/dev/null").stdout || '').trim();
+      if (!out) {
+        setVerdict('诊断没有输出，请重试；仍失败可用「诊断版」排查', 'bad');
+        toast('诊断没有输出');
+        return;
+      }
+      var box = $('logBox');
+      box.textContent = out + '\n\n（完整输出已存到 ' + tmp + '，模块目录「诊断」内另存一份，保留 7 天）';
+      logHoldUntil = Date.now() + 30000;
+      setLogCollapsed(false);
+      requestAnimationFrame(function () { box.scrollTop = 0; });
+      var m = /诊断结论:\s*(\S+)/.exec(out);
       if (m) {
         var level = m[1] === '可用' ? 'ok' : (m[1] === '疑似可用' ? 'warn' : 'bad');
         setVerdict('诊断结论：' + m[1], level);
         toast('诊断完成：' + m[1]);
       } else {
-        setVerdict('诊断没有输出，请重试；仍失败可用「诊断版」排查', 'bad');
-        toast('诊断没有输出');
+        setVerdict('诊断没有解析出结论，请重试', 'bad');
+        toast('诊断没有解析出结论');
       }
     }, 60);
   }

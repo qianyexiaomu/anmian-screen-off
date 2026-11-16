@@ -9,7 +9,7 @@
 <p align="center">  
   <img src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android\&logoColor=white" alt="Android">  
   <img src="https://img.shields.io/badge/Magisk-KernelSU-APatch-2563EB" alt="Root">  
-  <img src="https://img.shields.io/badge/version-2.6-0F172A" alt="version">  
+  <img src="https://img.shields.io/badge/version-2.6.1-0F172A" alt="version">  
   <img src="https://img.shields.io/badge/WebUI-内置-16A34A" alt="WebUI">  
 </p>
 
@@ -79,8 +79,8 @@ WebUI 随模块一同安装，入口文件为 `webroot/index.html`：
 
 Releases 提供两个变体，功能完全相同，按需选择其一：
 
-- **标准版** `anmian-screen-off-2.6.zip`：日常使用推荐，不含详细诊断。
-- **诊断版** `anmian-screen-off-diag-2.6.zip`：额外支持一键生成完整环境诊断报告，遇到问题机型时使用；更新走独立更新源，不会被自动替换成标准版。
+- **标准版** `anmian-screen-off-2.6.1.zip`：日常使用推荐，不含详细诊断。
+- **诊断版** `anmian-screen-off-diag-2.6.1.zip`：额外支持一键生成完整环境诊断报告，遇到问题机型时使用；更新走独立更新源，不会被自动替换成标准版。
 
 ## 配置
 
@@ -149,9 +149,9 @@ su -c '/data/adb/modules/anmian_screen_off/App_screen_off --test-off'
 
 ## 诊断报告
 
-完整的环境诊断报告由 **诊断版** 安装包提供（`anmian-screen-off-diag-2.6.zip`，具备标准版全部功能）：
+完整的环境诊断报告由 **诊断版** 安装包提供（`anmian-screen-off-diag-2.6.1.zip`，具备标准版全部功能）：
 
-- 下载地址：[Releases](../../releases) 或 <https://qianyexiaomu.github.io/anmian-screen-off/dist/anmian-screen-off-diag-2.6.zip>
+- 下载地址：[Releases](../../releases) 或 <https://qianyexiaomu.github.io/anmian-screen-off/dist/anmian-screen-off-diag-2.6.1.zip>
 - 生成入口：诊断版 WebUI →「导出报告」，或管理器中本模块的「操作」按钮
 - 与标准版同模块 ID，直接刷入即可替换，配置原样保留
 - 使用独立更新源 `dist/update-diag.json`，可以正常收到诊断版更新，又不会被替换成标准版

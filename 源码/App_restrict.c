@@ -24,7 +24,9 @@
 #define MAX_APPS 100
 #define CONFIG_LINE_MAX 512
 #define CONFIG_CHECK_INTERVAL 10
-#define MAX_LOG_SIZE (100 * 1024)
+#define MAX_LOG_SIZE (512 * 1024)
+#define LOG_KEEP_DAYS 30          /* 运行日志保留天数 */
+#define DIAG_KEEP_DAYS 7          /* 诊断/测试记录保留天数 */
 #define SCREEN_CHECK_INTERVAL 3
 #define SCREEN_OFF_VERIFY_MS 300
 #define SCREEN_OFF_VERIFY_TRIES 15
@@ -75,6 +77,7 @@ static bool touch_warned = false;
 static bool log_enabled = false;
 static FILE* log_fp = NULL;
 static char log_file_path[256] = {0};
+static FILE* diag_fp = NULL;      /* 诊断/测试输出同时落盘一份 */
 
 static AppConfig apps[MAX_APPS];
 static int app_count = 0;
@@ -106,6 +109,7 @@ static time_t mono_now(void) {
 }
 
 static void write_log(const char* fmt, ...);
+static void diag_line(const char* fmt, ...);
 
 static void handle_signal(int sig) {
     (void)sig;
@@ -152,6 +156,115 @@ static void write_log(const char* fmt, ...) {
     fputc('\n', log_fp);
     fflush(log_fp);
     va_end(args);
+}
+
+/* 解析日志行首的 [YYYY-MM-DD HH:MM:SS] 时间戳，失败返回 0 */
+static time_t parse_log_ts(const char* line) {
+    if (line[0] != '[') return 0;
+    int y, mo, d, h, mi, s;
+    if (sscanf(line, "[%4d-%2d-%2d %2d:%2d:%2d]", &y, &mo, &d, &h, &mi, &s) != 6) return 0;
+    struct tm tmv;
+    memset(&tmv, 0, sizeof(tmv));
+    tmv.tm_year = y - 1900;
+    tmv.tm_mon = mo - 1;
+    tmv.tm_mday = d;
+    tmv.tm_hour = h;
+    tmv.tm_min = mi;
+    tmv.tm_sec = s;
+    return mktime(&tmv);
+}
+
+/* 只保留最近 LOG_KEEP_DAYS 天的日志，避免长期运行日志无限增长 */
+static void prune_log(void) {
+    if (!log_file_path[0]) return;
+    FILE* in = fopen(log_file_path, "r");
+    if (!in) return;
+
+    char tmp_path[300];
+    snprintf(tmp_path, sizeof(tmp_path), "%s.tmp", log_file_path);
+    FILE* out = fopen(tmp_path, "w");
+    if (!out) {
+        fclose(in);
+        return;
+    }
+
+    time_t cutoff = time(NULL) - (time_t)LOG_KEEP_DAYS * 86400;
+    char* line = NULL;
+    size_t cap = 0;
+    ssize_t n;
+    long kept = 0;
+    long dropped = 0;
+    while ((n = getline(&line, &cap, in)) > 0) {
+        time_t ts = parse_log_ts(line);
+        if (ts != 0 && ts < cutoff) {
+            dropped++;
+            continue;
+        }
+        fwrite(line, 1, (size_t)n, out);
+        kept++;
+    }
+    free(line);
+    fclose(in);
+    fclose(out);
+
+    if (log_fp) {
+        fclose(log_fp);
+        log_fp = NULL;
+    }
+    if (rename(tmp_path, log_file_path) != 0) {
+        unlink(tmp_path);
+    }
+    ensure_log_file();
+    if (dropped > 0 && log_fp) {
+        LOG_I("清理了 %ld 条超过 %d 天的旧日志（保留 %ld 条）", dropped, LOG_KEEP_DAYS, kept);
+    }
+}
+
+/* 删除目录里超过 keep_days 天的普通文件（诊断/测试记录用） */
+static void prune_dir_old_files(const char* dir, int keep_days) {
+    DIR* d = opendir(dir);
+    if (!d) return;
+    time_t cutoff = time(NULL) - (time_t)keep_days * 86400;
+    struct dirent* e;
+    while ((e = readdir(d)) != NULL) {
+        if (e->d_name[0] == '.') continue;
+        char path[512];
+        snprintf(path, sizeof(path), "%s/%s", dir, e->d_name);
+        struct stat st;
+        if (stat(path, &st) != 0 || !S_ISREG(st.st_mode)) continue;
+        if (st.st_mtime < cutoff) unlink(path);
+    }
+    closedir(d);
+}
+
+static char diag_file_path[420] = {0};
+
+/* 打开诊断/测试记录文件：<模块>/诊断/前缀_时间.txt，顺带清掉过期记录 */
+static void open_diag_fp(const char* prefix) {
+    if (!module_dir[0]) return;
+    char dir[320];
+    snprintf(dir, sizeof(dir), "%s/诊断", module_dir);
+    mkdir(dir, 0755);
+
+    time_t now = time(NULL);
+    struct tm tmv;
+    char stamp[24] = {0};
+    if (localtime_r(&now, &tmv)) {
+        strftime(stamp, sizeof(stamp), "%Y%m%d-%H%M%S", &tmv);
+    } else {
+        snprintf(stamp, sizeof(stamp), "%lld", (long long)now);
+    }
+    snprintf(diag_file_path, sizeof(diag_file_path), "%s/%s_%s.txt", dir, prefix, stamp);
+    diag_fp = fopen(diag_file_path, "w");
+
+    prune_dir_old_files(dir, DIAG_KEEP_DAYS);
+}
+
+static void close_diag_fp(void) {
+    if (diag_fp) {
+        fclose(diag_fp);
+        diag_fp = NULL;
+    }
 }
 
 static int exec_cmd(const char* cmd, char* buf, size_t buf_size) {
@@ -655,23 +768,37 @@ static void trigger_screen_off(AppConfig* app) {
 }
 
 static int run_test_off(void) {
-    printf("=== 息屏测试 ===\n");
-    printf("屏幕状态: %s\n", query_screen_state() ? "点亮" : "熄灭");
+    open_diag_fp("测试");
+    diag_line("=== 息屏测试 ===");
+    bool on = query_screen_state();
+    diag_line("屏幕状态: %s", on ? "点亮" : "熄灭");
 
-    if (!query_screen_state()) {
-        printf("屏幕已经是熄灭的，先点亮再测\n");
+    if (!on && backlight_trusted && backlight_path[0] && !confirm_screen_off()) {
+        /* 部分机型（如一加 panel1-backlight）亮屏时背光读数仍为 0，不能据此判熄灭 */
+        diag_line("背光节点读数为 0 但系统仍在亮屏（该节点不可信），本测试改用 dumpsys 判定");
+        backlight_trusted = false;
+        on = query_screen_state();
+        diag_line("屏幕状态(复核): %s", on ? "点亮" : "熄灭");
+    }
+
+    if (!on) {
+        diag_line("屏幕已经是熄灭的，先点亮再测");
+        if (diag_file_path[0]) diag_line("本次测试记录已保存: %s", diag_file_path);
+        close_diag_fp();
         return 0;
     }
 
     bool ok = send_key(223) && wait_screen_off();
-    printf("KEYCODE_SLEEP(223): %s\n", ok ? "生效" : "未生效");
+    diag_line("KEYCODE_SLEEP(223): %s", ok ? "生效" : "未生效");
     if (!ok) {
         ok = send_key(26) && wait_screen_off();
-        printf("KEYCODE_POWER(26): %s\n", ok ? "生效" : "未生效");
+        diag_line("KEYCODE_POWER(26): %s", ok ? "生效" : "未生效");
     }
 
-    printf("最终屏幕状态: %s\n", query_screen_state() ? "点亮" : "熄灭");
-    printf("结果: %s\n", ok ? "息屏成功" : "息屏失败，可能被系统拦截了按键注入");
+    diag_line("最终屏幕状态: %s", query_screen_state() ? "点亮" : "熄灭");
+    diag_line("结果: %s", ok ? "息屏成功" : "息屏失败，可能被系统拦截了按键注入");
+    if (diag_file_path[0]) diag_line("本次测试记录已保存: %s", diag_file_path);
+    close_diag_fp();
     return ok ? 0 : 2;
 }
 
@@ -809,6 +936,13 @@ static void diag_line(const char* fmt, ...) {
     va_end(args);
     fputc('\n', stdout);
     fflush(stdout);
+    if (diag_fp) {
+        va_start(args, fmt);
+        vfprintf(diag_fp, fmt, args);
+        va_end(args);
+        fputc('\n', diag_fp);
+        fflush(diag_fp);
+    }
 }
 
 static void diag_text(const char* text, size_t max_len) {
@@ -845,6 +979,7 @@ static void diag_run(const char* label, const char* cmd) {
 
 static int run_diag(const char* config_path) {
     char ts[32];
+    open_diag_fp("诊断");
     time_t now = time(NULL);
     struct tm tmv;
     if (localtime_r(&now, &tmv)) {
@@ -854,6 +989,7 @@ static int run_diag(const char* config_path) {
     }
 
     bool bl_ok = false;
+    bool bl_untrusted = false;
     bool dumpsys_screen_ok = false;
     int touch_found = 0;
     int pkg_parsed = 0;
@@ -868,6 +1004,12 @@ static int run_diag(const char* config_path) {
         if (read_backlight(&bl) == 0) {
             bl_ok = true;
             diag_line("背光节点: %s = %ld", backlight_path, bl);
+            if (bl == 0 && !confirm_screen_off()) {
+                bl_untrusted = true;
+                backlight_trusted = false;
+                diag_line("注意: 背光读数为 0 但系统仍在亮屏，该节点不可信，模块将改用 dumpsys 判定");
+                diag_line("屏幕判定(复核): %s", query_screen_state() ? "点亮" : "熄灭");
+            }
         } else {
             diag_line("背光节点: %s 读取失败", backlight_path);
         }
@@ -981,10 +1123,10 @@ static int run_diag(const char* config_path) {
     } else {
         diag_line("- 前台识别: 命令全部解析失败，无法判断在用什么应用");
     }
-    if (bl_ok) {
+    if (bl_ok && !bl_untrusted) {
         diag_line("- 屏幕判定: 正常（背光节点可读）");
     } else if (dumpsys_screen_ok) {
-        diag_line("- 屏幕判定: 背光读不到，改用 dumpsys 判定");
+        diag_line("- 屏幕判定: 背光%s，改用 dumpsys 判定", bl_untrusted ? "读数不可信" : "读不到");
     } else {
         diag_line("- 屏幕判定: 读不到屏幕状态");
     }
@@ -998,6 +1140,8 @@ static int run_diag(const char* config_path) {
     }
 
     diag_line("=== 诊断结束 ===");
+    if (diag_file_path[0]) diag_line("完整诊断已保存: %s", diag_file_path);
+    close_diag_fp();
     return 0;
 }
 
@@ -1569,13 +1713,31 @@ static int run_label_one(const char* pkg) {
 
 static void set_module_dir(const char* config_path) {
     module_dir[0] = '\0';
-    if (!config_path) return;
-    const char* slash = strrchr(config_path, '/');
-    if (!slash) return;
-    size_t n = (size_t)(slash - config_path) + 1;
-    if (n >= sizeof(module_dir)) n = sizeof(module_dir) - 1;
-    memcpy(module_dir, config_path, n);
-    module_dir[n] = '\0';
+    if (config_path) {
+        const char* slash = strrchr(config_path, '/');
+        if (slash) {
+            size_t n = (size_t)(slash - config_path) + 1;
+            if (n >= sizeof(module_dir)) n = sizeof(module_dir) - 1;
+            memcpy(module_dir, config_path, n);
+            module_dir[n] = '\0';
+        }
+    }
+    if (!module_dir[0]) {
+        /* --test-off 等一次性调用可能没带 --config，用自身所在目录推导 */
+        char self[300];
+        ssize_t n = readlink("/proc/self/exe", self, sizeof(self) - 1);
+        if (n > 0) {
+            self[n] = '\0';
+            const char* slash = strrchr(self, '/');
+            if (slash) {
+                size_t len = (size_t)(slash - self) + 1;
+                if (len < sizeof(module_dir)) {
+                    memcpy(module_dir, self, len);
+                    module_dir[len] = '\0';
+                }
+            }
+        }
+    }
 }
 
 /* WebUI 点「读取应用名」时 touch .labels，这里 fork 一个子进程去扫，主循环不阻塞 */
@@ -1661,6 +1823,8 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    set_module_dir(config_path);
+
     if (test_off) return run_test_off();
     if (icon_debug_pkg) return run_icon_debug(icon_debug_pkg);
     if (icon_pkg) return run_icon(icon_pkg);
@@ -1686,6 +1850,8 @@ int main(int argc, char* argv[]) {
         if (!log_fp) {
             fprintf(stderr, "无法打开日志文件: %s\n", log_file_path);
             log_enabled = false;
+        } else {
+            prune_log();   /* 启动时清一次超过保留期的旧日志 */
         }
     }
 
@@ -1731,6 +1897,7 @@ int main(int argc, char* argv[]) {
     init_touch_devices();
 
     time_t last_config_check = 0;
+    time_t last_log_prune_day = time(NULL) / 86400;
     bool last_logged_screen_state = true;
     bool prev_touch_ok = true;
 
@@ -1740,6 +1907,11 @@ int main(int argc, char* argv[]) {
         long spent = 0;
 
         time_t now = mono_now();
+        time_t wall_today = time(NULL) / 86400;
+        if (wall_today != last_log_prune_day) {
+            last_log_prune_day = wall_today;
+            if (log_enabled && log_file_path[0]) prune_log();   /* 每天清一次过期日志 */
+        }
         bool screen_on = is_screen_on();
 
         if (!screen_on && last_logged_screen_state && !confirm_screen_off()) {

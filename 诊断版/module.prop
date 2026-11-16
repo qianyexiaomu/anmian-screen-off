@@ -1,7 +1,7 @@
 id=anmian_screen_off
 name=安眠[息屏管理][诊断版]
-version=2.6
-versionCode=260
+version=2.6.1
+versionCode=261
 updateJson=https://qianyexiaomu.github.io/anmian-screen-off/dist/update-diag.json
 author=Qian Ye
 description=为指定应用设置使用时限，连续无触摸操作时自动熄屏。在标准版基础上增加详细环境诊断报告，便于向开发者反馈问题机型。

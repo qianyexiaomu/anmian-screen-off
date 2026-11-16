@@ -70,29 +70,41 @@
 
   .app {
     border-top: 1px solid var(--line);
-    padding: 12px 0 10px;
+    padding: 12px 0;
   }
   .app:first-of-type { border-top: none; padding-top: 4px; }
-  .app-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; }
-  .app-name { font-weight: 500; font-size: 15px; }
-  .app-pkg { color: var(--muted); font-size: 12px; word-break: break-all; margin-top: 1px; }
-  .del {
-    border: none; background: transparent; color: var(--danger);
-    font-size: 13px; padding: 4px 6px; cursor: pointer; border-radius: 8px;
+  .app-head { display: flex; align-items: center; gap: 10px; }
+  .app-info { flex: 1 1 auto; min-width: 0; }
+  .app-name {
+    font-weight: 600; font-size: 15px; line-height: 1.3;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
   }
+  .app-pkg {
+    color: var(--muted); font-size: 11.5px; margin-top: 2px;
+    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+  }
+  .app-ops { display: flex; align-items: center; gap: 2px; flex: 0 0 auto; }
+  .pin, .del {
+    border: none; background: transparent; font-size: 12.5px;
+    padding: 5px 7px; cursor: pointer; border-radius: 8px;
+  }
+  .pin { color: var(--muted); }
+  .pin:active { background: rgba(127,127,127,.12); }
+  .del { color: var(--danger); }
   .del:active { background: rgba(220,38,38,.1); }
 
-  .stepper { display: flex; align-items: center; gap: 8px; margin-top: 10px; }
+  .stepper { display: flex; align-items: center; gap: 6px; margin-top: 9px; }
+  .step-label { font-size: 12px; color: var(--muted); margin-right: auto; }
   .step {
-    width: 42px; height: 38px; border-radius: 10px; flex: 0 0 42px;
+    width: 34px; height: 32px; border-radius: 9px; flex: 0 0 34px;
     border: 1px solid var(--line); background: var(--bg); color: var(--text);
-    font-size: 18px; line-height: 1;
+    font-size: 16px; line-height: 1;
   }
   .step:active { background: var(--accent-soft); color: var(--accent); }
-  .unit { color: var(--muted); font-size: 13px; }
+  .unit { color: var(--muted); font-size: 12.5px; }
   .time-input {
-    width: 68px; text-align: center; padding: 9px 10px; font-size: 15px;
-    border: 1px solid var(--line); border-radius: 10px;
+    width: 56px; text-align: center; padding: 6px 8px; font-size: 14.5px;
+    border: 1px solid var(--line); border-radius: 9px;
     background: var(--bg); color: var(--text);
     font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
   }
@@ -139,6 +151,57 @@
   .verdict.ok { background: rgba(21,128,61,.12); color: var(--ok); }
   .verdict.warn { background: rgba(180,83,9,.12); color: var(--warn); }
   .verdict.bad { background: rgba(220,38,38,.10); color: var(--danger); }
+  .pick {
+    margin-top: 10px; padding: 12px; border-radius: 12px;
+    background: var(--bg); border: 1px solid var(--line);
+  }
+  .pick-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+  .pick-title { font-size: 13.5px; font-weight: 500; }
+  .pick-count { margin-left: 8px; font-size: 12px; font-weight: 400; color: var(--muted); }
+  .picklist { max-height: 50vh; overflow: auto; margin-top: 4px; -webkit-overflow-scrolling: touch; }
+  .pickrow { display: flex; align-items: center; gap: 10px; padding: 7px 6px; border-radius: 10px; }
+  .pickrow:active { background: var(--accent-soft); }
+  .avatar {
+    flex: 0 0 34px; width: 34px; height: 34px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 14px; font-weight: 600;
+    background: var(--accent-soft); color: var(--accent);
+  }
+  .avatar.unknown { background: rgba(128,128,128,.14); color: var(--muted); }
+  .avatar { position: relative; overflow: hidden; }
+  .avatar img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; display: none; }
+  .pinfo { flex: 1 1 auto; min-width: 0; }
+  .pnm { font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .ppk { color: var(--muted); font-size: 11.5px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pickact {
+    flex: 0 0 auto; border: 1px solid var(--line); background: var(--card);
+    color: var(--accent); border-radius: 999px; padding: 5px 13px; font-size: 12.5px;
+  }
+  .pickact.done { color: var(--muted); border-style: dashed; background: transparent; }
+  .pickmore {
+    width: 100%; margin: 6px 0 2px; padding: 10px 0;
+    border: none; background: transparent; color: var(--accent); font-size: 13px;
+  }
+  .pick { position: relative; }
+  .picklist { padding-right: 24px; }
+  .pickrail {
+    position: absolute; right: 2px; top: 104px; bottom: 8px;
+    display: flex; flex-direction: column; justify-content: center;
+    width: 20px;
+  }
+  .railbtn {
+    border: none; background: transparent; color: var(--muted);
+    font-size: 9.5px; line-height: 1; padding: 2px 0; border-radius: 4px;
+  }
+  .railbtn.on { color: var(--accent); font-weight: 700; background: var(--accent-soft); }
+  .pickgroup {
+    margin: 8px 0 2px; padding-top: 4px;
+    font-size: 11px; color: var(--muted); letter-spacing: .6px;
+  }
+  .picksep {
+    margin: 10px 0 2px; padding-top: 8px; border-top: 1px dashed var(--line);
+    font-size: 12px; color: var(--muted); letter-spacing: .3px;
+  }
   #toast {
     position: fixed; left: 50%; bottom: 96px; transform: translateX(-50%) translateY(10px);
     background: rgba(20,22,28,.92); color: #fff;
@@ -176,14 +239,26 @@
     <div class="hint" id="srcInfo">读取中…</div>
     <div id="list"></div>
     <div class="manual">
-      <input class="search" id="pkgInput" placeholder="输入包名，常用应用自动识别名称">
+      <input class="search" id="pkgInput" placeholder="输入包名，自动识别名称">
       <button class="btn ghost" id="pkgAdd">添加</button>
     </div>
-    <div class="hint">没有触摸达到设定时间后自动息屏；有触摸会重新计时。</div>
-    <div class="btn-row">
-      <button class="btn ghost" id="importBtn">从 Download 导入</button>
-      <button class="btn ghost" id="backupBtn">恢复备份</button>
+    <div class="btn-row" style="margin-top:8px">
+      <button class="btn ghost" id="pickBtn">选择应用</button>
+      <button class="btn ghost" id="importBtn">导入备份</button>
+      <button class="btn ghost" id="exportCfgBtn">导出备份</button>
     </div>
+    <div class="hint">换机备份：导出到 Download/配置.prop，新机再「导入备份」。</div>
+    <div class="pick" id="picker" hidden>
+      <div class="pick-head">
+        <span class="pick-title">已安装应用<span class="pick-count" id="pickCount"></span></span>
+        <button class="del" id="pickReload" style="color:var(--accent)">重新读取</button>
+      </div>
+      <input class="search" id="pickSearch" placeholder="搜索应用名或包名">
+      <div class="hint" id="pickHint" style="margin-top:6px">正在读取…</div>
+      <div class="picklist" id="pickList"></div>
+      <div class="pickrail" id="pickRail"></div>
+    </div>
+    <div class="hint">无触摸达到设定时间即息屏，触摸后重新计时。</div>
   </section>
 
   <section class="card">
@@ -230,6 +305,9 @@
   var IMPORT_PATH = '/sdcard/Download/配置.prop';
   var LOG = MOD + '/运行日志.log';
   var TMPOUT = '/data/local/tmp/.anmian_out';
+  var NAME_CACHE = MOD + '/应用名称.tsv';
+  var ICON_DIR = MOD + '/图标';
+  var ICON_INDEX = ICON_DIR + '/index.tsv';
 
   // 包名 → 应用名，仅用于显示。字典里没有的包名会显示包名本身，
   // 添加时再尝试从设备上读一次（见 resolveLabel）。
@@ -311,11 +389,54 @@
     'com.tencent.mtt': 'QQ浏览器',
     'com.android.chrome': 'Chrome',
     'com.autonavi.minimap': '高德地图',
-    'com.baidu.BaiduMap': '百度地图'
+    'com.baidu.BaiduMap': '百度地图',
+    // 系统内置 / 常用工具
+    'com.android.settings': '设置',
+    'com.android.deskclock': '时钟',
+    'com.android.documentsui': '文件',
+    'com.android.gallery3d': '图库',
+    'com.android.contacts': '联系人',
+    'com.android.dialer': '电话',
+    'com.android.mms': '信息',
+    'com.android.calendar': '日历',
+    'com.android.calculator2': '计算器',
+    'com.android.vending': 'Google Play',
+    'com.google.android.gm': 'Gmail',
+    'com.google.android.apps.photos': 'Google 相册',
+    'com.google.android.apps.maps': '谷歌地图',
+    'com.whatsapp': 'WhatsApp',
+    'org.telegram.messenger': 'Telegram',
+    'com.facebook.orca': 'Messenger',
+    'com.spotify.music': 'Spotify',
+    'com.netflix.mediaclient': 'Netflix',
+    'com.microsoft.office.word': 'Word',
+    'com.microsoft.office.excel': 'Excel',
+    'com.microsoft.office.powerpoint': 'PowerPoint',
+    'cn.wps.moffice_eng': 'WPS Office',
+    'com.baidu.netdisk': '百度网盘',
+    'com.alicloud.databox': '阿里云盘',
+    'com.tencent.qqmail': 'QQ邮箱',
+    'com.achievo.vipshop': '唯品会',
+    'com.tmall.wireless': '天猫',
+    'com.unionpay': '云闪付',
+    'com.hpbr.bosszhipin': 'BOSS直聘',
+    'com.tencent.tim': 'TIM',
   };
 
   var entries = [];
   var dirty = false;
+  var nameMap = {};
+  var pkgName = {};
+  var nameScanning = false;
+  var scanTried = false;
+  var iconIndex = {};
+  var iconCache = {};
+  var iconQueue = [];
+  var iconTimer = null;
+  var iconIndexLoaded = false;
+  var nativeIconOk = 0;
+  var nativeIconOkCount = 0;
+  var nativeIconFail = 0;
   var srcLabel = '';
 
   function $(id) { return document.getElementById(id); }
@@ -406,7 +527,7 @@
   }
 
   function displayName(e) {
-    return e.name || PRESETS[e.pkg] || e.pkg;
+    return e.name || pkgName[e.pkg] || PRESETS[e.pkg] || e.pkg;
   }
 
   // 配置文件里 package 上一行的注释存的是应用名；文件头那几行说明性注释不能当名字。
@@ -485,7 +606,7 @@
       setSrcInfo('没有找到配置文件，添加应用后保存即可生成');
       return;
     }
-    setSrcInfo('来源：' + srcLabel + ' · 共 ' + entries.length + ' 个应用' + (dirty ? ' · 未保存' : ''));
+    setSrcInfo('来源：' + srcLabel + (dirty ? ' · 未保存' : ''));
   }
 
   function load() {
@@ -495,6 +616,9 @@
       setSrcInfo('无法读取配置');
       return;
     }
+
+    // 管理器没有原生接口时，别再去试 ksu://icon，直接用缓存或现场解包
+    if (!nativePm()) nativeIconOk = -1;
 
     var dis = sh("test -f '" + MOD + "/disable' && echo 1");
     if ((dis.stdout || '').trim() === '1') notice('模块当前处于禁用状态，配置仍可修改，启用后生效。');
@@ -515,6 +639,10 @@
 
     render();
     refreshStatus();
+    setTimeout(function () {
+      primeEntryNames();
+      prefetchEntryIcons();
+    }, 30);
   }
 
   function importDownload() {
@@ -535,22 +663,24 @@
     toast('已导入 ' + entries.length + ' 个应用');
   }
 
-  function restoreBackup() {
-    var r = sh("cat '" + BACKUP + "' 2>/dev/null");
-    if (r.errno !== 0 || !(r.stdout || '').trim()) {
-      toast('还没有备份文件');
+  function exportBackup() {
+    if (!hasKsu()) return;
+    if (!entries.length) {
+      toast('列表是空的，先添加应用再导出');
       return;
     }
-    var list = parseConfig(r.stdout);
-    if (!list.length) {
-      toast('备份文件里没有可识别的配置');
+    var content = serialize(entries);
+    sh("mkdir -p '/sdcard/Download'");
+    var w = sh("printf '%s' '" + b64(content) + "' | base64 -d > '" + IMPORT_PATH + ".tmp' && mv -f '" + IMPORT_PATH + ".tmp' '" + IMPORT_PATH + "'");
+    if (w.errno !== 0) {
+      w = sh("printf '%b' '" + toOctalEscaped(content) + "' > '" + IMPORT_PATH + ".tmp' && mv -f '" + IMPORT_PATH + ".tmp' '" + IMPORT_PATH + "'");
+    }
+    if (w.errno !== 0) {
+      notice('导出失败（退出码 ' + w.errno + '）：' + ((w.stdout || '').trim() || '未知错误'));
+      toast('导出失败，看上方提示');
       return;
     }
-    entries = list;
-    dirty = true;
-    srcLabel = '上次备份';
-    render();
-    toast('已恢复备份');
+    toast('已导出到 Download/配置.prop，共 ' + entries.length + ' 个应用');
   }
 
   function render() {
@@ -573,7 +703,12 @@
       var head = document.createElement('div');
       head.className = 'app-head';
 
+      var av = makeAvatar(e.pkg, displayName(e), true);
+      head.appendChild(av);
+      queueIcons([e.pkg]);
+
       var info = document.createElement('div');
+      info.className = 'app-info';
       var nm = document.createElement('div');
       nm.className = 'app-name';
       nm.textContent = displayName(e);
@@ -604,12 +739,10 @@
       };
 
       var ops = document.createElement('div');
-      ops.style.display = 'flex';
-      ops.style.gap = '2px';
+      ops.className = 'app-ops';
       if (idx > 0) {
         var top = document.createElement('button');
-        top.className = 'del';
-        top.style.color = 'var(--muted)';
+        top.className = 'pin';
         top.textContent = '置顶';
         top.onclick = function () {
           var item = entries.splice(idx, 1)[0];
@@ -630,6 +763,11 @@
 
       var tr = document.createElement('div');
       tr.className = 'stepper';
+
+      var lb = document.createElement('span');
+      lb.className = 'step-label';
+      lb.textContent = '限制';
+      tr.appendChild(lb);
 
       var minus = document.createElement('button');
       minus.className = 'step';
@@ -699,13 +837,16 @@
       return;
     }
 
-    var p = sh("pidof App_screen_off 2>/dev/null || ps -A 2>/dev/null | grep '[A]pp_screen_off' | awk '{print $2}' | head -n 1");
-    var pid = (p.stdout || '').trim();
+    var p = sh("pidof App_screen_off 2>/dev/null || ps -A 2>/dev/null | grep '[A]pp_screen_off' | awk '{print $2}'");
+    var pids = (p.stdout || '').trim().split(/\s+/).filter(function (x) { return !!x; });
     var badge = $('statusBadge');
-    if (pid) {
+    if (pids.length) {
       badge.classList.remove('off');
       $('statusText').textContent = '运行中';
-      $('procInfo').textContent = 'PID ' + pid + ' · 配置每 10 秒检查一次';
+      var extra = '';
+      if (pids.length === 2) extra = ' · 扫描进行中';
+      else if (pids.length > 2) extra = ' · 检测到 ' + pids.length + ' 个进程，可点「重启」清理';
+      $('procInfo').textContent = 'PID ' + pids.join(' ') + ' · 配置每 10 秒检查一次' + extra;
     } else {
       badge.classList.add('off');
       $('statusText').textContent = '未运行';
@@ -779,22 +920,15 @@
     }, 60);
   }
 
-  function manualAdd() {
-    var el = $('pkgInput');
-    var pkg = (el.value || '').trim().replace(/\s+/g, '');
-    if (!/^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$/.test(pkg)) {
-      toast('包名格式不对，例如 com.ss.android.ugc.aweme');
-      return;
-    }
+  function addEntry(pkg) {
     if (entries.some(function (e) { return e.pkg === pkg; })) {
       toast('这个包名已经在列表里了');
-      return;
+      return false;
     }
 
-    var entry = { pkg: pkg, limit: '30m', name: PRESETS[pkg] || '' };
+    var entry = { pkg: pkg, limit: '30m', name: PRESETS[pkg] || nameMap[pkg] || '' };
     entries.push(entry);
     dirty = true;
-    el.value = '';
     render();
 
     if (entry.name) {
@@ -803,6 +937,17 @@
       toast('已添加，正在识别应用名称…');
       setTimeout(function () { resolveLabel(entry); }, 60);
     }
+    return true;
+  }
+
+  function manualAdd() {
+    var el = $('pkgInput');
+    var pkg = (el.value || '').trim().replace(/\s+/g, '');
+    if (!/^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$/.test(pkg)) {
+      toast('包名格式不对，例如 com.ss.android.ugc.aweme');
+      return;
+    }
+    if (addEntry(pkg)) el.value = '';
   }
 
   // 字典里没有的包名，添加时再问一次设备：先确认装了没有，再看能不能读到应用名。
@@ -848,6 +993,739 @@
     }
 
     toast('已添加 ' + entry.pkg + '；系统没提供这个应用的名称，显示包名');
+  }
+
+  var installedList = null;
+  var pickerOpen = false;
+  var pickLetter = '';
+  var COLLATOR = null;
+  try { COLLATOR = new Intl.Collator('zh-Hans-CN'); } catch (e) { COLLATOR = null; }
+  // 拼音首字母的边界字：用中文排序比较，落在哪两个边界之间就是哪个字母
+  var PICK_LETTERS = [['A','阿'],['B','八'],['C','擦'],['D','搭'],['E','蛾'],['F','发'],['G','噶'],['H','哈'],
+                      ['J','击'],['K','喀'],['L','拉'],['M','妈'],['N','拿'],['O','哦'],['P','啪'],['Q','七'],
+                      ['R','然'],['S','撒'],['T','塌'],['W','挖'],['X','西'],['Y','压'],['Z','匝']];
+  var iconSrc = {};
+  var iconAsked = {};
+  var iconDead = {};
+  var entryIconTried = {};
+  var entryNameTried = {};
+
+  function validPkgName(s) {
+    return /^[A-Za-z][A-Za-z0-9_]*(\.[A-Za-z0-9_]+)+$/.test(s);
+  }
+
+  // KernelSU / APatch 新版的 WebUI 接口：直接给包名、应用名，图标走 ksu://icon/<包名>
+  function nativePm() {
+    try {
+      if (typeof ksu === 'undefined' || !ksu) return null;
+      if (typeof ksu.pm === 'function') {
+        var p = ksu.pm();
+        if (p && typeof p.getPackagesInfo === 'function') return p;
+      }
+    } catch (e) { /* 老版本没有这个接口 */ }
+    return null;
+  }
+
+  function nativeList() {
+    var p = nativePm();
+    if (!p || typeof p.listPackages !== 'function') return null;
+    try {
+      var arr = JSON.parse(p.listPackages('all'));
+      return Array.isArray(arr) && arr.length ? arr : null;
+    } catch (e) { return null; }
+  }
+
+  function nativeLabels(pkgs) {
+    if (!pkgs.length) return null;
+    var p = nativePm();
+    var raw = null;
+    try {
+      if (p) raw = p.getPackagesInfo(JSON.stringify(pkgs));
+      else if (typeof ksu !== 'undefined' && typeof ksu.getPackagesInfo === 'function') {
+        raw = ksu.getPackagesInfo(JSON.stringify(pkgs));
+      }
+    } catch (e) { return null; }
+    if (!raw) return null;
+    try {
+      var arr = JSON.parse(raw);
+      var map = {};
+      (arr || []).forEach(function (it) {
+        if (it && it.packageName && it.appLabel) map[it.packageName] = it.appLabel;
+      });
+      return Object.keys(map).length ? map : null;
+    } catch (e) { return null; }
+  }
+
+  function nativeIconSrc(pkg) {
+    return nativeIconOk < 0 ? '' : ('ksu://icon/' + pkg);
+  }
+
+  // 列出全部应用：各家 ROM 对 pm 参数支持不一，逐条回退，拿到就停
+  var PKG_LIST_CMDS = [
+    "pm list packages 2>/dev/null | head -n 600",
+    "/system/bin/pm list packages 2>/dev/null | head -n 600",
+    "cmd package list packages 2>/dev/null | head -n 600",
+    "pm list packages -f 2>/dev/null | sed 's/^package://; s/.*=//' | head -n 600",
+    "dumpsys package 2>/dev/null | awk '/Package \\[/{print $2}' | tr -d '[]' | head -n 600",
+    "cat /data/system/packages.list 2>/dev/null | awk '{print $1}' | head -n 600"
+  ];
+
+  var PKG_NOISE = ['com.android.providers.', 'com.android.internal.', 'com.android.permission'];
+
+  function isNoisePkg(pkg) {
+    if (pkg === 'android') return true;
+    if (pkg.indexOf('.overlay') >= 0) return true;
+    for (var i = 0; i < PKG_NOISE.length; i++) {
+      if (pkg.indexOf(PKG_NOISE[i]) === 0) return true;
+    }
+    return false;
+  }
+
+  function parsePkgList(text) {
+    var out = [];
+    var seen = {};
+    (text || '').split('\n').forEach(function (raw) {
+      var t = raw.replace(/\r$/, '').trim();
+      if (!t) return;
+      t = t.replace(/^package:/, '');
+      if (t.indexOf('=') >= 0) t = t.slice(t.lastIndexOf('=') + 1);
+      t = t.replace(/^\[/, '').replace(/\]$/, '');
+      var sp = t.indexOf(' ');
+      if (sp > 0) t = t.slice(0, sp);
+      if (!validPkgName(t) || seen[t] || isNoisePkg(t)) return;
+      seen[t] = 1;
+      out.push({ pkg: t, name: '' });
+    });
+    return out;
+  }
+
+  function loadInstalled(force) {
+    if (installedList && !force) return installedList;
+    installedList = null;
+
+    var saved = {};
+    entries.forEach(function (e) { if (e.name) saved[e.pkg] = e.name; });
+
+    var list = null;
+    var nat = nativeList();
+    if (nat) {
+      list = [];
+      nat.forEach(function (pkg) {
+        if (!validPkgName(pkg) || isNoisePkg(pkg)) return;
+        list.push({ pkg: pkg, name: '' });
+      });
+    }
+
+    for (var i = 0; !list && i < PKG_LIST_CMDS.length; i++) {
+      var parsed = parsePkgList(sh(PKG_LIST_CMDS[i]).stdout);
+      if (parsed.length) list = parsed;
+    }
+    if (!list || !list.length) {
+      installedList = [];
+      return installedList;
+    }
+
+    var labels = nativeLabels(list.map(function (it) { return it.pkg; }));
+    list.forEach(function (it) {
+      it.name = (labels && labels[it.pkg]) || PRESETS[it.pkg] || saved[it.pkg] || nameMap[it.pkg] || '';
+      if (it.name) pkgName[it.pkg] = it.name;
+    });
+    list.sort(function (a, b) {
+      if (!a.name !== !b.name) return a.name ? -1 : 1;
+      return (a.name || a.pkg).localeCompare(b.name || b.pkg, 'zh-Hans-CN');
+    });
+    installedList = list;
+    return list;
+  }
+
+  function pickRow(it, addedMap) {
+    var row = document.createElement('div');
+    row.className = 'pickrow';
+
+    var av = makeAvatar(it.pkg, it.name);
+    row.setAttribute('data-pkg', it.pkg);
+
+    var info = document.createElement('div');
+    info.className = 'pinfo';
+    var nm = document.createElement('div');
+    nm.className = 'pnm';
+    nm.textContent = it.name || it.pkg;
+    info.appendChild(nm);
+    if (it.name) {
+      var pk = document.createElement('div');
+      pk.className = 'ppk';
+      pk.textContent = it.pkg;
+      info.appendChild(pk);
+    }
+
+    var act = document.createElement('button');
+    act.className = 'pickact';
+    if (addedMap[it.pkg]) {
+      act.textContent = '已添加';
+      act.classList.add('done');
+      act.disabled = true;
+    } else {
+      act.textContent = '添加';
+      var add = function (ev) {
+        if (ev && ev.stopPropagation) ev.stopPropagation();
+        if (addEntry(it.pkg)) renderPicker();
+      };
+      act.onclick = add;
+      row.onclick = add;
+    }
+
+    row.appendChild(av);
+    row.appendChild(info);
+    row.appendChild(act);
+    return row;
+  }
+
+  function setPickCount(n) {
+    $('pickCount').textContent = n ? '· 共 ' + n + ' 个' : '';
+  }
+
+  // 0x4E00 起每个汉字一个拼音首字母，'?' 表示生僻字没查到
+  var PY_BASE = 0x4E00;
+  var PY_TABLE = 'ydkqsxhwzssxjbymgcczqpssqbycdscdqldylybsgjgyqzjjfgcclzzbwdwzjljpfyynwjjtmyyzwzhflyppqhgccyyymjqyxxgjxhsdsjnjjsmhmlzrxyfsngsyczqzggllyjlmyzssecykyyhqwjssggyxyqyjtwkdjhychmyxjtlxjyqbyxdldwrrjjwysrldzjpcbzjjbrcfslbczstzfxxthtrqggbdlyccscymmrfcyqzpwwjjyfcrwfdfzqpyddwyxkyjawjffxjpdftzyhhycyswccyqsclcxxwzzxnbgnnxbxlzsqcbsgpysyzdhmdzbqbzcwdzzyytzhbtsyyfzgntnxqywqskbphhlxgybfmjebjhhgqtjcysxstkzglyckglysmzxyalmeldccxgzyrcxsdltjzcqkcnnjwhjczzcqljststbnxbtyxceqxgkwjyflzqlyhjqspsfxlfpbyqxxxydcczylllsjxfhjxpjbcffyabyxbh'
+    + 'czbjyclwlczggbtssmdtjcxpthyqtgjjscjfzkjzjqnlzwlslhdzbwjncjzyzsqnycqyrzcjjwybrtwpyftwexcskdzctbxhyzcyyjxzcfbzzmjyxxcdczottbzljwfcgszsxfyrlnyjmbdthjxsqjccsbxyytsyfbjdztgbcnclcyzzbsacyzzscjcshzqydxlbpjllmqxtydzxsqjtzpxlcglqccwjbhctdjjsfxjejjtlbgxsxjmyjjqpfzasyjncydjxkjcdjszcbartcclnjqmwnqnclllkbybzzsyhqcltwlccrshllzntylnewyzyxczxxgdkdmtcedejtsyys?dqdfmsd?jlhrwnqlybglxhlgtgxbqjdzfyjsjyjcjmrnymgrcjczgjmzmgxmmryxkjnymsgmzjymklfxmbdtgfbhcjhkylpfmdxlqjjsmtqgzsjlqdldgjycalcmzcsdjllnxdjffffjczfmzffpfkhkgdpqxktacjdhhz'
+    + 'dddrrcfqyjkqccwjdxhwjlyllzgcfcqdsmlzpbjjplsbcjggdckkdezsqsckjgcgkdjtjllzycxklqscgjcltfpcqczgwbjdqsdjjbyjhsjddwgfsjgdkccctllpspkjgqjhzzljplgjgjjthjjyjzcjmlzlyqbgjwmljkxzdznjqsyzmljlljkywxmkjlhskjgbmclyymkxjqlbmclkmdxxkwyxwslmlpsjqjcqxyjfjtjdxmxxllcrqbsyjbgwywxggbcyxpjtgpepfgdjgbhbnsfjyzjkjkhxqfgqzkfhygkhdgllsdjjxpqykybnqsxqnszswhbsxwhxwbzzxdmndjbsbkbbzklylxgwxjjwaqzmywsjqlcjxxjqwjeqxscwetlzhlyyysdzpyqyzcptlshtzcfycyxyljsdcjjagyslcllyyysglrqqeldxzsccccadycjysfsgbfrsszqsbxjpsjwsdrckgjlgdkzjzbdktcsyqpyhstcldjlh'
+    + 'mxmcgxyzhjdctmhltxzxylymohyjcltyfbqqjbfbdfehtksqhzywwcnxxcdwhhwgyjlegmdqcwgfjhcsntwydolbygwqwesjpwnmlrydzsztxyqpzgcwxhngpyxshmdqjgztdppbfyhzhhjyfdzwkgkzbldntsxhqeegzxylzmmzyjzgszxkhkhtxexxgylyapsthxdwhzydpxagkydxbhnhxkdfjnmyhylpmgocslnzhkxxlbzzlbmlsfbhhgsgyyggbhscyajtxwlxtzqcwzydqdqmmgdqllszhlsjzwfjhqswscelqazynytlsxthaznkzzsdhlacxtwwcsgqqtddyzbcchyqzflxpslzygpzsznglydqcbdlxjtctajdkywnsyzljhhdzcwnyyzyomhychhhxhjkzwsxhdnxlyscqydpclyzwmypbkxyjlkzhtyhaxqsyshxasmchkdscrswjpwqsgzjlwwschs?hsqnhzsngndaqtbaalzzmsst'
+    + 'dqjcjktscjaxplggxhhgoxzcxpdmmhldgtybysjmxhmrcplxjzckzxshflqxccdhxezfchzccdytcjyxqhlxdhypjqxnlsyydzozjnyxqezysjyayjkypdghddxsppyzndlthrhxydpcjjhtcxmctlhbynyhmhzllhnxmylllmdcppxhmxdkycyrdltxjchhznxclcclylnzsxzjzzlnnllwhyqsnjhxynttdkyjpychhyegkcttwlgqrlggtgtygyhpyhylqyqgcwyqkpyyyttttlhyhlltyttsplkyzwgywgpydqqzzdqxskcqnmjjzzbxyqmjrtfbbtkhzkbjdjjkdjjtlbwfzpbtkqtztgpdgntpjyfalqmkgxbcclzfhzclllladpmxdjhlcclgyhdzfgyddgcyyfgydxkssebdhykdkdkhnaxxybfbyyhxcqgabfqyjjdmljcsjzllpchbsxgjyndybyqspqwjlzkcddtaccbkzdyzypjzqsjn'
+    + 'kktknjdjgyepgtlfyqkasdntcyhblgdzhbbydmjrygkzyheyybcmcdtyfzjjhgcjplxhldwxjjkytcyksssmtwcttqzlzbszdtwzxgzagyktywxlhlcpbclloqmmzsslcmbjcszzkydczxgqjdsmcytzqqlwzqzxssbpkdfqmddzdsddtdmfhtdyzjaqjqkypbdjyyxtljhdrqxxxhaydhrjlklytwhllrllrcxylbwsrszzsymkzzhhkyhxksmzsyzgcjfbzbsqlfcxxxnxkxwymsddyqwggqmmyhcdzttfgyyhgstttybykjdhkyjbelhdypjqnfxfdqkzhqkzbyjtzbxhfdxbdaswhawajldyjsfhbldnndnqjtjnchxfjsrfwhzfmdrfjyhwzpdjkzyjymfcyznynxfbytfwfwygdbnzzzdnytxzemmqbsqehxfzmbmflzzsrsymjgsxwzjsprydjsjgxhjjgljjynzjjxhgjkymlpeyycsysgqz'
+    + 'swhwlyrjlpxslcxmfsmwkcctnxnynpnjszhdzeptxmwywayysywlxjqzqxzdclaeelmcpjpclwbxsqhfwrtffjtnqjhjqdxhwlbyccfjlalkyyjldxhhycstdywncjtxywdrmdrqhwqcmfjdyzmhmayxjwmyzqsxtlmrspwwchajbxtgcypxyyrrclmpamgkqjszyjrmyjsnxtplnbappypylxmyzkynldgyjzczhnlmzhhanqmpgwqtzmxxmllhgdzxyhxkrxycjmffxyhjfsbssqlhxndycannmtcjcyprrnytyqnyymbmsxndlylysljnlqyshqmllyzlzjjjkymzcsfbzxxmstbjgnxyzhlsnmcqscyznfzlxbrnnnylmnrtgzqysatswryhyjzmzdhzgzdwybsscskxsyhytsxgcqgxzzbhyxjscrhmkkbsczjyjymkqhzjfnbhmqhysnjnzybknqmcjgqhwlsnzswxkhljhyybqcbfcdsxdlds'
+    + 'pfzfskjjzwzxsddxjseeegjscssmgclxxkywyllymwwwgydkzjgggtggsycknjwnjpcxbjjtqtjwdsspjxzxnzxwmelptfsxtllxcljxjjljsxctnswxlehhlyqrwhsycsqrybyaywjejqfwqcqqcjqgxaldbzzyjgkgxpltqyfxjltpadkyqhpmatlcpdhkxmtxybhblefxdleegqdymsawhzmljtwyqxlyjzljeeyxbqqffnlyxrdsctgjgxyylkllxqkcctlhjlqmkkzgcyygllljdzgydhzwxpysjbzkdzgyzzhywyfqytyzszyezklymhjjhtsmqwyzlkyywzcsrkqyqltdxwcdrjklwsqzwbdcqyncjsrszjlkcdcdtlzzzacqqczddxyplxcbqjylzllljddzjgyjyjzyxnyyynxjxkxdazwyrdljyyyrjlglldrxjcykywnqcclddnyyykyckczhjxcclgzqjgjwppcqqjysbzzxyjxjbxjf'
+    + 'zbsbdsfnsfpzxhdwztdmpptblzzbzdmyypqjrsdzsqzsqxbdgcpzswdwcsqzgmdhzxmwwfybpdgphtmjthzsmmbgzmbzjcfzhfcbbzmqcfmbcmcjxlgpnjbbxgyhyyjgptzgzmqbqdcgybjxlwzkydpdymgcftpfxyztzxdzxtgkmtybbclbjaskytssqyymscxfjeglsllszbqjjjaklyldlycctsxmcwfgkkbqxlllljyxtyltyxytdpjhnhgnkbyqnfjyyzbyyessessgdyhfhwtcjbsdzjtfdmxhcnjzymqwsrxjdzjqpdqbbsdjggfbkjbxdgjhmgwjjjgdllthzhhyyyyyysxwtyyyccbdbpypzyccztjpzywcbdlfwzcwjdxxhyhlhwczxjtczlcdpxdjczczlyxjjsjbhfxwpywxzptdzzbdccjhjhmlxbqxxbylrddgjrrctttgqsczwmxfytmwzcwjwxjywcskybzqccttqnhxnkxxkhkf'
+    + 'htswoccjybcmpzzyjbnnzpbthhjdlscddytyfjpxyngfxbyqxcbhxcbsxtyzdmzysnxsxlhkmzxlthdhkghxjsshqyhhcjyxglhzxcsnhekdtgqxqypkdhextykcnymyyypkqyytjxzlthhqtbyqhxbmyhsqckwwyllhcyylnneqxqwmcfbdccmljggxdqktlxkgnqcdgzjwyjjlyhhqtttnwchhxcxwheszjydjccdbqcdgdnyxzdhcqrxcbmztqcbxwgqwyybxhmbymykdyecmqkyaqyngyzslfykkqgyssqyshjgjcnxkzycxsbkyxhyylstycxqthysmgscpmmgcccccmtztasmgqzjhklosqylswtmqsyqkdzljqqyplcycztcqqpbbqjzclpkhqcyyxxdtdddsjcxffllchqxmjlwcjcxtspycxndtjshjwxdqqjckxyamylsjhmlalykxcyydmamdqmlmcznnyybzkkyflmchcmlhxrcjjhsy'
+    + 'lnmtjggzgywjxsrxcwjgjqhqzdqjdzjjzkjkgdzqgjjyjylhzxxcdqhhhestmhlfsbdjsyyshfyssczqlpbdrfrztzdkykgsctgkwdqzrkmsynbcrxqbjyfaxpzzedzcjykbcjwhyjbqdzywnyszptdkzpfpbaztklqyhbbzpnbptyzzybhnydcpjmmcycqmcjfzzdcmnlfpbplngqjtbttajzpzbbdnjkljqylnbzqhksjznggqsczkyxchpzsnbcgzkddzqanzgjkdntlzldwjljzlywtxndjzjhxyatncbgtzcsskmnjpjytsrwxcfjwjjtkhtzplbhsnjzsyjbwbzyzlstlsbjhdwwqpslmmfbjdwajyzccjtbnnrzwqxcdslqgdsdpdzhjtqqpsqlyyjzlgyhszlctcbjtktyczjtqkbpjlgmjzdmcsgpynjzjjyyknhrpwszxmtncszzyxybyhyzaxywkcjtllckjjtjhgcxdxyqyczbywblwq'
+    + 'cglzgjgqrqcczssbcrbcskydznljsqgxssjmecnstztpbdlthzwhqwqtzexnqczgweskssbybstscsjccgbfsdqszlccglllzghzcthcnmjgyzaznmckcstjmmzckbjygqljyjppldxrgzyxccsnhshgdznlzhzjjcddcbcjflbfqbczzwpqdnhxljcthqwjgylnlszzpcjdscqqhjqkdxkpbajyemsmjtzdxlcjyryynwjbngzzkmjxltbsllrtpylcsznxjhllhyllqqzqlxymrcwcxsljmczltzldwdjjllnzggqxppskygyggbfzpdkmwghcxmcgdxjmcjsdycabxjdlnbcddygskydjtxdjjyxmsaqazdzfslqxyjsjzylblxxwxqqzbjzlfbblylwdsljhxjyzjwtdjcyfqzqzzdcsxzzqlzcdzfchyspympqzmlpplffxjjnzzylsjyyqzfpfzksywjjjhrdjzzxtxxglghtdxcskyswmmtcw'
+    + 'ybazbjkshfhgcxmhfqhyxxyzftsjyzbxyxpzlchmzmbxhzzssyfdmncwdabazlxktcshhxkxjjzjsthygxsxyyhhhjwxkzxcsbzzwwhhcwtzzzpjxsnxqqjgzyzawllcwxzfxgyxyhxmkyyswsqmnjnaycyspmjkgwcqhylajjmzxhmmcnzhbhxclxtjpltxyjhdyylttxfszhyxxsjbjyayrsmxyplckdlyhlxrlnllstyzyyqygyhhsccsmcctzcxhyqfpyyrpfflfqtntszllzmhwtcjqyzwtllmlmdwmbzssmzrbpdddlgjjbxccsrzqqygwcsxfwzlxccrbtdzmcyggdlqsgtjmwljmymmsyhfbjdgyxccpshxczcsbsjwjgjmpbwaffyfnxhydxzylremzgzcyhsszdlljcsqfzxxkptxzgxjjgbmyyysnbdylbnlhbfzdcyfbmgqrrmsszxysgtznnydzzcdgbjafjbdknzblcsscpsgzycjs'
+    + 'zlmlrzzbzzldlsllysxsqzqlyxzlsgkbrxbrbzcycxzjzeeyfgklzlyyhgysgzlfjhgtgwkraajyzkzqtsshjjxdzyz?yjlzyrzdqqhgjzxsszbtkjpbfrtjxllfqwjgslqtymblpzdxtzagbdhzzrbgjhwnjtjxlhscfsmwlldqysjtxkzscfwjlbxftzlljzllqblcqmqqcgcdfpbbhzczjlpyygjdtgwdcfczqyyyqysrclqzfklzzzgffsqnwglhjycjjczlqzcyjbjzzbpdccmhjgxdqdgdlzqmfgpsytsdyfwwdjzjysxyycjcyhzwpbyhxrylybhkjksfxtzjmmchhlltnyymsxxyzpyjjycdyzwmtjjkqyrhllqxpsgtlwycljscbxjyzfnmlrgjjtyzbsyzmsjyjhgfzqmsyxrszcwtlrtqzsstkxgqggsptgcdnjsgcqcqhmxggztqydjkzdlbzsxjlhyqgggthqscpyhjhhgnygkggcmj'
+    + 'dzllcclxqsftgzslllmlcskctbljzzszmmnytpzsxqhjcjyqxyexzqzcpshkzzysxcdfgmwqrllqxrfztlysdctmjcsjjdhjnxtnrztzfqrhqgllgcxszsjdjljcytsjtlnyxhszxcgjzyqpylfhdjsbpcczgjjjqzjqdybssllcmyttmqtbhjqnnygkynqyqmzgcjkpdcgmyzhqllsllclmholzgdylfzsljcqzlylzcjeshnylljxgjxlyjyyyxnbcljsswcqqcjyllcldjyllzllbnylgqchxyyqoxccqkyjxxhyklksxayqccqkkkkcsgyxxyqxygwtjohthxpxxcsshcyeychzzcbwqbbwjqcscszsslzylgdesjzmmymcytsdsxxscjpqqsqylyfzychdjdzywcbtjsydjhcyddjlbdjjsodzyqysqkxxdhhgqjyohdyxwgmmmajdybbbppbcmhcpljzsmtxerxjmhqdstpjdcbssmsssthjts'
+    + 'lmmtrcplzszmlqdsdmjmqpnqdxcfynbfsdqqyxhyaykqyddlqyyysszbydslntfgtzqbzmchdhczcwfdxtmqqsphqwwxsrgjcwtjtzzqmgwjjrjhtqjbbgwzfxjhnqfxxqywyyhyscdydhhqmnmdmmcpbszppzzglmzfollcfwhmmsjzttthlmyffytzzgzyskjjxqyjzqphmbzzlyghgfmshpcfzsnclpbqsnjszslxjfpmtyjygbxlldlxpzjypjyhhzcywhjylsjexfsszywxkzjlladtmlymqjpwxxhxsktqjezrpxxzghmhwqpwqlyjjqjjzszcfhjlchhnxjlqwzjhbmzyxbdhhypylhlhlgfwlcfyytlhjjcjmscpxstkpnhjxsntyxxtestjctlsslstdlllwwyhdhrjzsfgxssyczykwhtdhwjslhtzdqdjzxxqggyltzphcsqfzlnjtclzpfstpdynylgmjllycqhynsbchylhqyqtmzyb'
+    + 'bywrfqykjsyslzdyjmpxyyssrhzjnyqtqdfzbwwdwwrxcwhgyhxmkmyyyhmsmzhngcepmlqqmtcwctmhmxjpjjhfxyyzsjzhtybmstsyjdtjjqytlhynbyqzlcxcnzwsmylkfjxlwgbypjytysylymzckttwlgsmzsylmpwlzwxwqzssaqsyxyrhssntsrapccpwcmgdhhxzdzxfjhgzttsbjhgyglzysmyclllybtyxhbbzjkssdmalhhycfygmqypjycqxjllljgclzgqlycjcctotyxmtmshllwcgfxymzmklpszzzxhhjyslctyjcyhxsgyxzkxlzwpyjpdhjwpjpwsqqxlxxdhmrslzcyzwstcxkystzshbsccstplwsscjchjlcgchssphylhfhhxjsxyllnylmzdhzxylsxlwzyhcldyahzcmddyspjtqjzlngjfsjshctsdszlblmssmnyymjqbjhrcwtyydchqljapzwbgqybkfcmjwlzll'
+    + 'yylszydwhxpsbcmljpscgbhxlqhyrljxyswxhxzlldfhlslymjljyflyjycdrjlfsyzfsllcqyqfgjyhyszlylmstdjcyhbzllnwlxxygyyhbmgdhxxhhlzzjzxczzzcyqzfnjwpylcpkpykpmclgkdgxzggwqbdxzzkzfbxxlzxjtpjpttbytszzdwslchzhsltjxhqlhyxxxywzyswtmzkhlxzxzpyhgchkjfsyh?tjrlxfjxptztwhplyxfcrhxshxkjxxyhzjdxjwylhyhmjdbflkhtxcwhcfwjcfpqrxqxcyyyjygrpxgscsxngwchkzdxhflxxhjjbyzwtsxnncyjjymswzjqrmhxzwfqsylzjzgbhynslbgttcsebhxxwxyhhxyxnsqyxmlywrgyqlxbbcljsylpsytjzyhyzawlhorjmksczjxxxyxchcytryxqjddsjfslyltsffyxlmtyjmjjyyyxltzcsxqzlhzxlwyxzhdnlrxhxjcdy'
+    + 'hlbrlmbrllaxksllljlyxxlycrylcjcgjcmtlzllcyzzpzpcyawhjjfybdyyzsepckzdqyqpbpcjpdcyzbdbbcyydycnnpjmtmlrmfmmgwygbsjgygsmdqqqztxmkqwgxllpjgzbqcdjjjfpkjkcxbljmswmdtqjxldlppbxcwkcqqbfqjczagzgmykbhyyhzykndkzmbpjyspxthlfpnyygxjdbkxnhhjhzjxstrstldxskzysybmxjlxyslbzyslhxjpfxbqnbylljqkygzmcyzzymccsldlhzgwfwyxzmwcxtynxjhbyymcysbmhysmydyshqyzchmjjmzcaahcbjbbhplxtylsxsdjgjdhkxxtxxnbhnmlngsltxmrhnlxqjxmzllyswqgdlbjhdcgjyqycmhwfwjybbbyjmjwjmdpwhxqldyapdfxxbcgjspckrssyzjmslbzzjfljjjlgxzgyxyxlszqyxbexyxhgcxbpldyhwecdwwcjmbtxc'
+    + 'hxyqxllxflyxlljlssfwdpzsmyjclmswtczbchqekcqbwlcgydblqppqzqfjqdjhymmcxtxdrmjwrhxcjzclqxdyynhyyhrslsrsywwzjymtltllgzqcjzyabsckzcjyccqljsqxalmzyyywlwdxzxqdllqshgpjfjljhjabcqzdjgthhsstcyjlbswzlxzxrwgldlzrlzqtgsllllzlymxqgdzhgbdbhzpbrlw?xqbpfdwo??whlypcbjcc?dmbzpbzz?cyqxldomzblzwpdwyygdstthcsqsccrsssyslfybfntyjszdfndpthtzzmbblxlcmyffgtjjqwftmdpjwdnlbzcmmctgbdzlqlpyfhsymjylsdchdzjwjcctljcldtljjcpddpjdsszynndbjlggjzxsxnlycybjjqxcbylzcfzppgkcxzdzfztjjfjsjxzbnzyjqttyjwhtyczhymdjxttmpxsflzcdwslshxybzgtfmlcjtacbbmgdew'
+    + 'ycyzcdszcyhflyctygwhkjyylsjcxgywjcbhlcsnddbtzbsclyzczzssqdllmqyyhfllqllxfdyhabxggnywyypllsdldllbjcyxjzmlhljdxyyqytdlllbbgbfdfbbqjzzmdpjhgclgmjjpgaehhbwcqxaxhhhzchxyphjaxhlphjpgpzjqcqzgjjzzgzdmqyybzzphyhybwhazyjhykfgdpfqsdlzmljxjpgalxzdaglmdgxmwzqytxdxxpfdmmssympfmdmmkxksyzyshdzkjsysmmzzzmsydnzzczxbmlstmddnmxckjmztyymzmzzmsshhdccjemxxkljstgwlsqlyjzllsjssdbpmhnlyjczyhmxxhgzcjmdhxtkgrmxfwmckmwkdcksxqmmmfzzydkmsclcmpcgmwrpxqpzdsslcxkyxtmlgjyahzjgzqmcsnxyhmmpmlkjxmhlmlgmxctkzmjjyszjsyszhsyjzjcdajzybsdqjzgwzkgxfk'
+    + 'dmsdjlfmehkzqkjbeypzyszcdwyjffmzjykttdzzefmzlbnpplplpbpszalltylkckqzkgenqlwagxxydpxlhsxqqwqykxqclhyxxmlyccwlymqyskychlcjnszkpyzkcqzqljbdmdjhlasqlbydwqlwdnbqcrydddtjybkbwszdxdtnpjdtctqdfxqqmgnseclstbhpwslctxxlpwydzklzygzcqapllkccylbqmqczqcljslqzdjxldthpzqdljjxzqdjyzhkzljcyqdyjppypeakjyrmpcbymcxkllzllfqpylllmbsglcysslrsysqtmxyxqqzbdzrysyztffmzzsmzqhzssccmlyxwtpzgxzjgzgsjsgkddhtqggzllbjdzlcbzhyxyzhzfywxyzymsdbzzyjgtsmtfxqyxjscdgslnmdlrytzlryylxqhtxsrtzcgyxbnqqzfhykmzjbzymkbpnlyzpblmcnqyzzzsjzhjctzhhyzzjrdyzhnf'
+    + 'xglfxslkgjtctssyllgzrzbbjzzklpkbczyslxyxbjfpnjzzxcdwxzyjxzzdjjgggrsrjkmcmzjlsjywqshyhqjsxpjzzzlsnshrnypjtwchklbsrzlcxwjqxqkysjycztlqzybbybwzjqdwgyzcytjcjxckcwdkkzxsgkdzxwwyyjqyytcytdjlxwkczkklcclzcqqdzlqlcsfqchqhsfsmqzzllbjjzbsjhtsjdysjqjpdlzcdcwjkjzzlpycgmzwdjjbsjqzsyzyhhxcbbjydssddzncglqmbtsfcbfdzdlznfgfjgfsmptjqlmblgqcyyxbqkdxjqsrfkztjdhczklbsdzcfytplljgjhtxzcsszzxstcygkgckgyoqxjplzbbbgtgyjdgczqszlbjlsjfzgkqqjcgyczbzqtldxrjxbsxxpzxhyzyclwdsjjhxmfczpfzhqhqmqgkslyhtycgfrzgnqxclpdlbzcsczqlljblhbdcypczppdymt'
+    + 'zsgyhckcpzjgslclnscdsldzxbmsdlddfjmkdjdhslzxlszqpqpgjllybdszgqlbzlslkyyhzttncjyqtzzfszqztlljtyyllqllqyzqlbdzlslyyzymdfszsnhlxznczqzbbwskrfbcyzmthblgjpmczzcstlxshtzcyzlzblfeqhlxflcjlyljqcbzlzjghsstbrmhxzhjzclxfnbgxgtqjcztmsfzkjmssnxljkbhszxntnlzdntlmsjxgzjyjczxyhyhwrwwqnztnfjscpzshzjfyrdjsfscjzbjfzqzchzlxfxsbzqlzsgyftzdcszxzjbqmszkjrhxjzcgbjkhchgtjkjqglxbxfgdrtylxjxgdtsjxhjzjjcmzlcqsbtxhqgxttxhxftsdkfjhzyjfjxrzcdlllcqsqqzqwqxswqtwgwbzcgcllqzbclmqqtzgzxzxljfrmyzflxysqxxjkxrmjdcdmmyxbsqbhgcmwfwtgmxlzbyytgzyccd'
+    + 'xyzxswgxyjyznbgpzjcqsyxcxrtfycgrhztxszzthcbfclsyxzljqmzlmplmxzjssflbysmyqhxjsxrxsqzzzsslyflczjrcrxhhzxqydshxsjjhzcxjbdynsysxjbqlpxzqpymlxzkyxlxcjlcycrxzzlldlllsjyhzxgyjwkjrwyhcpsgnrzlfzwfzznsxgxflzsxzzzbfcsyjdbrjkrdhhgxjljjtgxjxxstjtjxlyxqfcsgswmsbctlqzzwlzzkxjmltmjyhsddbxgzhdlbmyjfrzfcgclyjbpmlysmsxlszjqqhjzfxgfqfqbpxzgyyqxgztcqwyltlgwwgwhllfsfgzjmgmgbgtjfsyzzgzyzaflsspmlbflcwbjzcljjmzlpjjlymqdmyyyfbgygqzglyzdxqyxrqqqhsxyyqqygjtyxfsfsllgnqcygycwfhcccfxbylypllzqxxxxxkqhhxshjdcfdsczjxcpzwhhhhhapylhalpqafyhxd'
+    + 'yllkmzqgggddesrnndltzgchybpysqjjhclljtolnjpzljlhymheydydsqycddhgzpndzclzywllznteytgxlhslpjjbdgwxpcdntjcklkclwkllcasstknzdnqnttlyyzssysszzryljqkcgbhhcrxrzydgrgcwcgzhfffppjfzynakrgywyqpqxxfkjtszzxswzddfbbqtbgtzfznpzfpzxzpjszbmqhkcyxyldkljnypkyghgdcjxxeahpnzgctzcmxcxmmjxnkszqnmnlwbwwxjjyhclstmcsqdjcxxtpcnpdtnnpglllzcjlspblplkcdtnjnlyyrscffjfqwdpgzdwmnzcclodaxnssnyzrestyjwjyjdbcfxnmwttbqlwstszgybljpxglboclgpcbjftmxzljylzxcltpnclcgxtfzjshcrxsfyszdkntlbyjcyjllstgqcbxnwzxbxklylhzlqzlnzcqwgzlgzjncjgcmnzzgjdzxtzjxyc'
+    + 'yycxxjyyxjjxsssjstssttppghtcsxwzdcsyfptfbchfbblzjclzzdbxgcxlqpxkfzflsyltywbmnjhskbmddbcysccldxycddqlyjjhmqllcsgljjsyfpyyccyltjantjjpwycmmgqyysqdhqmzhszxpftwwzqswqrfkjlxjqqyfbrxjhhfwjgzyqacmyfrhcyybyqwlpexcczstyrltsdmqlykmbbgmyyjprknnbbsxyxbhyzdjdnghpmfsgbwfzmfjmmbcmzzcjjlcnyxyqgmlrygqccyhzlwjgcjcggmcjjfyzzjhycfrrcmtzqzxhfqgdjxccjeaqcrjthpljlszdjrbcqhjdzrhxlyxjsymhzydwldfryhbbydtssccwbxglpzmlzztqsscpjmmxjcsjytycghycjwsnsxlfemwjnmkllswtxhyyygcmmcwjdqdjzglljwjnkhpzggflccsczmcbltbhbqjxqdjpdjqtghglfqawbzyjjltstd'
+    + 'hqhctcbchflqmpwdshyytqwcnztjtlbypbpdyyyxsqkxwyyflxxncwcxybmaelykkjmzzzbrxyaqjfljpfhhhytzzxrgqqmhspgdzjwbwpjhzjdyscqwzkthxsqlzyymysdzgrxckkhjlwpysyscsyzlrmlqsyljxbcxtlhdqzpcycykpppnsxfyzjjrcemhszmsxlxglrwgcstlrsxbygbzgztcpldjlslylymdtmtcpalcxpqjcjwtcyyzlblxbzlqmyljbghdslssdmxmbdczsxwhamlczcpjmcnhjyjnsygchskqmzzqdllkablwjqsfmocdxjrrlyqchjmybyqlrhetfjzfrfksryxfjdwdsxxlwsqjyslyxwjhsnlxyyxhbhawhhjcxwmyljcsqlkydttxbzsxfdxgxsjhhsxxybssxdpwncmrptjzczenygcxqfjxkjbdmljcmqqxloxslyxxlylljdzbtymhbfsttqqwlhogyblscalzxqlh'
+    + 'twrrqhlstmypyxjjxmqsjpnbryxyjllyqylthylqyfmhkljdmllhfzwkzhljmlhljkljstlqxylmbhhlnlsxqchxcfxxlhyhjjgbyzzkbxscqdjqdsxjzsyhzhhmgsxcsymxfebcqwwrbpyyjqtyqcyjhqqzyhmwffhgzfrjfcdbxndqyzpcyhhjlfrzgppxzdbbgzqstlgdgylcqmgchhmfywlzyxkjlypqhsywmqqgqzmlzjnsqxjqsyjtcbehsxfssfxzwfllbcyyjdytdthwzsfjmqqyjlmqsxlldttkhhybfpwdyysqqrnqwlgwdebdwcyygcdlkjxtmxmyjsxhybrwfymwfrxyqmxysctzztfykmldhqdlwyqnlcryjblpsxcxywlsbrrjwxhqybhtydnhhgmmywytzcsqmtssccdalwztcpqpyjllqzyjswxwzzmmglmxclmxczmxmzsqtzppjqblpgxjzhfljjhycjsnxwcxsccdlxsyjdcq'
+    + 'cxslqyclzxlzzxmxqrjmhrhzjphmfljlmlclqnldxzlllfypngjysxcqqdcmqjzzxhnpnxzmekmxxykyqlxsxtxjxyhwdcwdzhqyybgybcyscfgfsjnzdyzzjzxrzrqjjymcanhrjtldbpyzbstjhxxzypbdwfgzzrpymtngxzqbyxmbbfcckrjjjbjegrzgyclkxzdxkknsjkcljspgyyzlqqjybzssqlllkjfcbktylcccdblsppfylgydtzjyqggkqttfcxbdkdxxhybbfytyhbclpdytgdhryrnjsbtcsnyjqhklllzslydxxwbcjqsbxbfjzjcjdzfbxxbrmlazgcsnclbjdstblfrzdswsbxbcllxxlzdjzsjpylyxxyftfffbhjjjgbygjpmmmmsscljmtlyzjxswxtyledqpjmygqzjgdjlqjwjqllsdgjgygmscljjxdtygjqjqjcjzcjgdzdshqgsjggcjhqxsnjlzzbxhsgzxcxyljxyx'
+    + 'yydfqqjhjfxdhctxjyrxysqtjxyefyyssyxjxncyzxfxcsyszxyyschshxzzzgzzzgfjdldylnpzgyjyzyyqzpbxqbdztzczyxxyhhscxshcggqhjhgxwsztmzmehyxgebtylzkkwytjzrclekestdbcykqqsayxcjxwwgsbhjszsdhcsjkqcxswxfctynydpzcczjqtzwjqdzzzqzljchlsbhpydxpsxshhezdxfptjqyzzxhyaxncfzyyhxgnqmywxtzsjpkhhgymxmxqcxtsbcqsjyxhtyylybcqlmmszmjzjllcogxzaajzyhjmchhcxzsxzdznleyjjzjbhzwzzsqtzpsxztdsxjjjznyazphhyysrnqdthzhayjyjhdzxzlswclybzyecwcycrylcxnhzydzydyjdfrjjhtrsqtxyxjrjhojynxelxsfsfjzghpzsxzszdzcqzbyyklsgsjhczshdgqgxyzgxchxzjwyqwgyhksseqzzndzfkw'
+    + 'yssdclzstsymcdhjxxyweyxczaydmpxmdsxybsqmjmzjmtzqlpjyqzcgqhxjhhhxxhlhdldjqsldwbsxfzzyyschtytyjbhecxhjkgjfxbhyzjfxbwhbdzfyzbcapnpgnydmsxhkhhmamlnbyjtmpxyjmcthjbzyfcgtyhwphftgzzezsbzegpbmdskftycmhbllhgpzjxzjgzjyxzsbbqsczzlzccstpgxmjsftcczjzdjxcybzlfcjsyzfgszlybcwzzbyzdzypswyjgxzbdsysxlgzbzfygczxbzhzftpbgzgejbstgkdmfhyzzjhzllzzgjqzlsfdjsscbzgpdlfzfzszyzyzsygcxsntxchczxtzzljfzgqsqyxzjqccccdjcdxzjyqjccgxztdlgscxzsyjjqtcclqdqztqchqqjztezzzpbkkdjfcjfztybqyqttynlmbdktjcpqzjdzfpjsbnjlgyjdxjdzqkzgqkxclpzjtcjdqbxdjjjst'
+    + 'cjnxbxcmslyjcqmtjqwwcjjnjnlllhjcwqtbzqyczczpzzdzyddcyzdzccjgtjfzdprntctjdcqtqndtjnplzbcllctdsxkjzqdpzlbznbtjdcxfczdbccjjltqjpldcgzdbbzjcqdcjwynllzlzccdwllxwzlxrsntqjccxkjlsgdfqtddglrlajjtklymkqlldzytdyycygjwyxdxfrskstcdenqmrkqzhhqkdldazfkypbggpzrebzzykyzspegjjglkqzzzslysywyzwfqznlzzlzhwcgkypqgnpgblplrrjyxcccgyhsfzfwbzywtgzxyljczwhxzjzblfflgskhyjzeyjhlpllllcygxdrzelrhgklzzyhzlyqszzjzqljzflnbhgwlczcfjwspyxnlzlxgccpzbllcxbbbbxbbcbbcrnncccyrbbsyldcgqyyqxygmqzwtzydyjhyfwdehzdjywlccntzyjjcdedpzdztstqjhdymbjnyjzlx'
+    + 'tsstphndjxxbyxqtzqddtjtdyztgwscszqflshlglbcjbhdlyzjyckwtydylbnydsdsycctyszyyebgexhqddwnygyclxtdcystqmygzasccszzddlcclzrqxyyeljsbymxshztembbllyyllytdqyshymrqxkfkbfxnxsbychxbwjyhtqbpbsbwdzylkgzskyghqzjhhxjxgnljkzlyycdxlfwfghljgjybxblybxqpqgztzplncybxdjyqydymrbesjyyhkxxstmxrczzywxyhybmcflyzhqyzmqxdbxbzwzmslpdmyckfmzklzcyjycclhxfzlydqzpzygyjyzmzxdzfyfyttqtchgspczmlccytzxjcytjmkslpzhysnwllytpzctzzcktxdhxxtqcypksmqccyyazhtjpcylzlyjbjxtfnyljyynrxcylmmnxjsmybcsysslzylljjgyldzdpqbfzzblfndsqkczfhhhgqmrdsxycstxnqqjpyj'
+    + 'bfcxdyqfbnxejdgyqbsrcnfyyqpghyjdyzxgrhtkyleqdzntsmgklbsgbpyszbytjzsszjcssxzbhbscsbzczptqfzmqflypybbjgszmxxdjmthyskkbjtxhjcegbsmjyjzcxtmljyxrzzqscxxqptzxmkyxxxjcljprmyygadyskqlsadhrskqxzxztcghztlmlwxybwsycdbhjhcfcwzsxhytkzlxqshlyczjxemplprcgltbzztlzjcyjgdtclglpllqpjmzpapxyzlaktkdnczzbnzctdqqzjyjgmctxltgcszlmlhbglkfwnwzhdxphlfmkydlgxdtwzfrjejctzhydxykshwfzcqshktmqqhtchymjdjskhxzjzbzzxympajqmsdbxlsklyynwrtsqlscbpdbsgzwyhtlkssswhzzlyytnxjgmjszsxfwnlsoztxgxlsammlbwldszylakqcqctmycfjbslxclzjclxxksbzqclhjphqplsxsc'
+    + 'kslnhpsfqqytxjjzlqldxzjjzdyydjnzptfcdskjfsljhylzqjzlbthydgdjfdbyazxdzhzjnhhqbyknxjjqczmlljzkspldsclbblxklelxjlbjycxjxgcnlcqplzlznjtzljgyzdzpltqcssfdmnycxgbtjdcznbgbqyqjwgkfhtnbyqzqgbkpbbyzmtjdytblsqmbsxtbnpdxklemyycjynzdtldykzzxddxhqshdgmzsjycctayrzlpwltlkxslzcggexclfxlkjrtlqjaqzncmbqdkkcxglczjzxjhptdjjmzqykqsecqzdshhadmlzfmmzbgntjnnlgbyjbrbtmlbyjdzxlcjlpldlpcqdhlhzlycblcxzcjadqlmzmmsshmybhbskkbhrsxxjmxsdznzpxlbbragggfchgmsklltsjyycqlcskywyehywhbhqywbawykqldqftntkhqcgdqktgpkxhcpdhtwtmssyhbwcrwxhjmkmzngwtmlk'
+    + 'fghkjyldyycxwhyeclqhkqhtdqhhffldxqwgzyydesbpkyrzpjfyyzjceqdzzdlattbbfjllcxdlmjsdxegygsjqxcfbxsszpdyzcxdnyxpfzydlyjccpltxlsxyzyrxcyysdylwwndsahjsygyhgywkaxtjzdaxysrltdjssaxfnejdxyzhlxlllzhzsjnyqyqqxyjghzgjcyjchzlycdshwsgczyjxcllnxzjjyyxnfsmwfpylcyllabwddhwdxjmcxztzpmlqzhsfhzynztlldywlslxhymmylmbwwkyxyadtxylldjpybpwfxjmmmllhafdllaflbhhhbqqjtzjcqjjdjtffkmmmbythygdcqrddwrqjxnbysnmzdbyytbjhpybygtjxaahgqdqtmystqxkbtsbkjlxrbeqqhqmjjbdjwtgtbxpgbktlgqxjjjcdhxqdwjlwrfmqgwqhckryswgbtgygbwsdwdwrfhwytjjxxxjyzyslphyypayx'
+    + 'hydqkxshxyxeskqhywbdddpplcjlhqeewxksyyhdyplfjthkjltcyyhhjttpltzzcdlthqkcxqysteeywkyzyxxyysddjkllpwmcyhqgxyhcrmbxpllnqydqhxsxxwgdqbshyllpjjjthyjkyphthyyktyezyenmdshlcrpqfbgfxzbsbtlgxsjbswyysksflxlpplbbblbsfxfyzbsjssylpbbffffsscjdstzsxtryjcyffsytyzbjtbctsbsdhrtjjbytcxyjeylxcbnebjdsysyhgsjzbxbytfzwgenyhhthjhatfwgcstbgxklstywmtmbyxjskzscdyjrcytwxzfhmymcxlznsdjtttxrycfyjsbsdyerxhljxbbdeynjghxgckgscymblxjmsznskgxfbnbbthfjaafxyxfpxmyfhdtzcxzzpxrsywzdlybbjtyqwqjpzypzjznjpzjlztfysbttslmptzrtdxqsjehbzylzdhljsqmlhtxtj'
+    + 'ecxalzzspktlzkqqyfsygywpcpqfhqhytqxzkrsgtgsqczlptxcdyyzssqzslxlzmacbcqbzyxhbsxlzdltcdjtylzjyytpzylltxjsjxhlbmytxcqrblzssfjzztnjydxmyjhlhpblcyxqjqqkzzscpzkswalqsblcczjsxgwwwygyatjbbctdkhqhkgtgpbkqyslbxbbckbmllxdzstbklggqkqlsbkkdfxrmdkbftpzfrtbbmferqgxkjpzsstlbzdpszqzsjthljqlzbpmsmmsxlqqnhknblrddnhxdhddjcyygyfqgzlgsygmjqgkhbpmxyxlytqwlwgcpbmjxcyzydrjbhtdjxeeshtmjsbyplwhlzffnypmhxqhpltbqpfbcwjdbygpnxtbfzjgsddtjshxeawzzyllttybwjkgxghlfkxdjtmszsqynzggswqsphtlsskmclzxyszqzxncjdqgzdlfnykljcjllzlmzznhydsshthxzlzzbb'
+    + 'hqzwwycrdhlyqqjbeyfsgxthsrxwqhwfslmssgzttyeyqqwrslalhmjtqjsmxqbjjzjxzyzkxbyqxbjxshzssfglxmxzxfghkzszggylclsarjxhslllmzxelglxydjytlfbhbpnlyzfbbhptgjkwetzhkjjxzxxglljlstgshjjyqlqzfkcgnndjsszfdbctwwseqfhqjbsaqtgypjlbxbmmywxgslzhglzgnyfljbyfdjfrgsfmbyzhqfbwjsyfyjjphzbyyzffwodgrlmftmlbzgycqxcdjygzyyyytytydwegazyhxjlzythlrmgrjxzclhneljjthtbwjybjjbxjjtjteekhwsljplpsfazpqqbdlqjjtyyqlyzkdksqjyyjzldqcgjjyzjsycmraqthtejmfctyhypkmhycwjdcfhyyxwshctxrljgjshccyyyjltkttytmxgtcjtzayyoczlylbszywjytsjyhbyshfjlygjxxtmzyyltxxyp'
+    + 'clxyjzyzyypnhmymdyylblhlsyygqllnjjymsoycbzgdlyxylcqyxtszegxhzglhwbljgeyxtwqmakbpqcgyshhegqcmwyywljyjhyyzlljjylhzyhmgsljljxcjjyclycjpcpzjzjmmylcjlnqljjjlxxjmlszljqlycmmhcfmmfpqqmfxlqmcffqmmmmhmznfhhjgtthhkhslnchhyqdxtmmqdcydyxyqmyqylddcyyydazdcymzydlzfffmmycqcwzzmabtbyctdmndzggdftypcgqyttssffwbdtzqssystwjjhjytsxxylbyqhwwhxezxwznnqzjzjjqjccchyyxbzxccyjtllcqxknjycyycynzzqyyoewyczdcjycchyjlbtzkycqwlpgpyllgkdldlgkgqbgychjxy????z?w???z????s?????l???????sl??z????lgtm????gd?????????????????????atn??hbltdzlatmmbj?lx';
+
+  function pinyinInitial(ch) {
+    var i = ch.charCodeAt(0) - PY_BASE;
+    if (i < 0 || i >= PY_TABLE.length) return '';
+    var c = PY_TABLE.charAt(i);
+    return (c >= 'a' && c <= 'z') ? c.toUpperCase() : '';
+  }
+
+  function initialOf(name) {
+    var s = (name || '').trim();
+    if (!s) return '#';
+    var ch = s.charAt(0);
+    var up = ch.toUpperCase();
+    if (up >= 'A' && up <= 'Z') return up;
+    if (up >= '0' && up <= '9') return '#';
+    var py = pinyinInitial(ch);
+    if (py) return py;
+    if (!COLLATOR) return '#';
+    var res = '#';
+    for (var i = 0; i < PICK_LETTERS.length; i++) {
+      if (COLLATOR.compare(s, PICK_LETTERS[i][1]) >= 0) res = PICK_LETTERS[i][0];
+      else break;
+    }
+    return res;
+  }
+
+  function buildRail() {
+    var rail = $('pickRail');
+    if (!rail) return;
+    rail.innerHTML = '';
+
+    var present = {};
+    installedList.forEach(function (it) { present[initialOf(it.name || it.pkg)] = 1; });
+
+    var all = document.createElement('button');
+    all.className = 'railbtn' + (pickLetter ? '' : ' on');
+    all.textContent = '全';
+    all.onclick = function () {
+      pickLetter = '';
+      $('pickSearch').value = '';
+      renderPicker();
+    };
+    rail.appendChild(all);
+
+    var letters = [];
+    for (var i = 0; i < PICK_LETTERS.length; i++) {
+      if (present[PICK_LETTERS[i][0]]) letters.push(PICK_LETTERS[i][0]);
+    }
+    if (present['#']) letters.unshift('#');
+
+    letters.forEach(function (L) {
+      var b = document.createElement('button');
+      b.className = 'railbtn' + (pickLetter === L ? ' on' : '');
+      b.textContent = L;
+      b.onclick = function () {
+        pickLetter = (pickLetter === L) ? '' : L;
+        $('pickSearch').value = '';
+        renderPicker();
+      };
+      rail.appendChild(b);
+    });
+  }
+
+  function renderPicker() {
+    if (!installedList) return;
+
+    var box = $('pickList');
+    box.innerHTML = '';
+    setPickCount(installedList.length);
+
+    var kw = ($('pickSearch').value || '').trim().toLowerCase();
+    var addedMap = {};
+    entries.forEach(function (e) { addedMap[e.pkg] = 1; });
+
+    var items = installedList.filter(function (it) {
+      if (!kw) return true;
+      return ((it.name || '') + ' ' + it.pkg).toLowerCase().indexOf(kw) >= 0;
+    });
+
+    if (!kw && pickLetter) {
+      items = items.filter(function (it) { return initialOf(it.name || it.pkg) === pickLetter; });
+    }
+
+    items.sort(function (a, b) {
+      if (!a.name !== !b.name) return a.name ? -1 : 1;
+      return (a.name || a.pkg).localeCompare(b.name || b.pkg, 'zh-Hans-CN');
+    });
+
+    if (kw) {
+      for (var i = 0; i < items.length; i++) box.appendChild(pickRow(items[i], addedMap));
+    } else {
+      var last = '';
+      items.forEach(function (it) {
+        var L = initialOf(it.name || it.pkg);
+        if (L !== last) {
+          last = L;
+          var head = document.createElement('div');
+          head.className = 'pickgroup';
+          head.textContent = L;
+          box.appendChild(head);
+        }
+        box.appendChild(pickRow(it, addedMap));
+      });
+    }
+
+    buildRail();
+
+    if (!items.length) {
+      $('pickHint').textContent = kw ? '没有匹配的应用，换个关键字试试'
+        : (pickLetter ? ('「' + pickLetter + '」开头没有应用') : '没有应用');
+    } else if (kw) {
+      $('pickHint').textContent = '匹配 ' + items.length + ' 个应用';
+    } else if (pickLetter) {
+      $('pickHint').textContent = '「' + pickLetter + '」开头 · ' + items.length + ' 个应用';
+    } else {
+      $('pickHint').textContent = '共 ' + installedList.length + ' 个应用';
+    }
+
+    queueVisibleIcons();
+  }
+
+  function iconMime(b64) {
+    var bin;
+    try { bin = atob(b64.slice(0, 32)); } catch (e) { return ''; }
+    var c = function (i) { return bin.charCodeAt(i) || 0; };
+    if (c(0) === 0x89 && c(1) === 0x50) return 'image/png';
+    if (c(0) === 0xFF && c(1) === 0xD8) return 'image/jpeg';
+    if (c(0) === 0x52 && c(1) === 0x49 && c(2) === 0x46 && c(3) === 0x46 && c(8) === 0x57) return 'image/webp';
+    return '';
+  }
+
+  // 已配置应用的原生图标取不到时，单独问守护进程要这一张
+  function retryEntryIconBinary(pkg) {
+    var isEntry = false;
+    entries.forEach(function (e) { if (e.pkg === pkg) isEntry = true; });
+    if (!isEntry || entryIconTried[pkg] || !hasBinary()) return;
+    entryIconTried[pkg] = 1;
+    var r = sh("'" + MOD + "/App_screen_off' --icon='" + pkg + "' 2>/dev/null");
+    var b = (r.stdout || '').replace(/\s+/g, '');
+    var mime = b ? iconMime(b) : '';
+    if (!mime) return;
+    iconCache[pkg] = 'data:' + mime + ';base64,' + b;
+    delete iconDead[pkg];
+    paintIcon(pkg, iconCache[pkg]);
+  }
+
+  function applyIconImg(img, pkg, src) {
+    if (src.indexOf('ksu://') === 0) {
+      img.onload = function () { nativeIconOkCount++; };
+      img.onerror = function () {
+        img.onerror = null;
+        nativeIconFail++;
+        // 只有「一次都没成功」且失败足够多，才判定管理器不支持这个协议；
+        // 几百个应用里个别取不到图标很常见，不能因此把所有图标都关掉
+        if (nativeIconOkCount === 0 && nativeIconFail >= 6) {
+          nativeIconOk = -1;
+          for (var k in iconSrc) {
+            if (iconSrc[k].indexOf('ksu://') === 0) delete iconSrc[k];
+          }
+          iconDead = {};
+          if (!scanTried) startNameScan();
+          // 协议不可用：已配置的应用立刻改用 --icon 现场取图，不等整机扫描
+          setTimeout(function () { prefetchEntryIcons(); }, 0);
+        }
+        delete iconSrc[pkg];
+        if (iconCache[pkg]) {
+          iconSrc[pkg] = iconCache[pkg];
+          img.src = iconCache[pkg];
+          img.style.display = 'block';
+        } else if (iconIndex[pkg]) {
+          queueIcons([pkg]);
+        } else {
+          iconDead[pkg] = 1;
+          img.style.display = 'none';
+          setTimeout(function () { retryEntryIconBinary(pkg); }, 0);
+        }
+      };
+    }
+    img.src = src;
+    img.style.display = 'block';
+  }
+
+  // 图标来源统一记在 iconSrc[pkg]，重绘时直接复用，不会因为重新渲染而丢图标。
+  // 选择器里几百行不一次性发几百个 ksu:// 请求，交给 queueVisibleIcons 只画可见行。
+  function makeAvatar(pkg, name, eager) {
+    var av = document.createElement('div');
+    av.className = 'avatar' + (name ? '' : ' unknown');
+    var sp = document.createElement('span');
+    sp.textContent = name ? name.charAt(0) : '?';
+    av.appendChild(sp);
+
+    var img = document.createElement('img');
+    img.setAttribute('data-icon-pkg', pkg);
+    img.alt = '';
+    av.appendChild(img);
+
+    if (iconDead[pkg]) return av;
+
+    if (iconSrc[pkg]) {
+      applyIconImg(img, pkg, iconSrc[pkg]);
+    } else if (eager) {
+      if (nativeIconOk >= 0) {
+        iconSrc[pkg] = 'ksu://icon/' + pkg;
+        applyIconImg(img, pkg, iconSrc[pkg]);
+      } else if (iconCache[pkg]) {
+        iconSrc[pkg] = iconCache[pkg];
+        applyIconImg(img, pkg, iconSrc[pkg]);
+      } else {
+        queueIcons([pkg]);
+      }
+    }
+    return av;
+  }
+
+  function paintIcon(pkg, src) {
+    iconSrc[pkg] = src;
+    var nodes = document.querySelectorAll('img[data-icon-pkg="' + pkg + '"]');
+    for (var i = 0; i < nodes.length; i++) applyIconImg(nodes[i], pkg, src);
+  }
+
+  function queueIcons(pkgs) {
+    var added = false;
+    pkgs.forEach(function (p) {
+      if (iconSrc[p] || iconDead[p] || iconAsked[p] || iconQueue.indexOf(p) >= 0) return;
+      if (nativeIconOk < 0 && !iconIndex[p] && !iconCache[p]) return;
+      iconQueue.push(p);
+      added = true;
+    });
+    if (added && !iconTimer) iconTimer = setTimeout(pumpIcons, 20);
+  }
+
+  function pumpIcons() {
+    iconTimer = null;
+    if (!iconQueue.length || !hasKsu()) return;
+    var pkg = iconQueue.shift();
+    if (!iconSrc[pkg] && !iconDead[pkg]) {
+      if (nativeIconOk >= 0) {
+        paintIcon(pkg, 'ksu://icon/' + pkg);
+      } else if (iconCache[pkg]) {
+        paintIcon(pkg, iconCache[pkg]);
+      } else if (iconIndex[pkg] && !iconAsked[pkg]) {
+        iconAsked[pkg] = 1;
+        var r = sh("base64 '" + ICON_DIR + "/" + iconIndex[pkg] + "' 2>/dev/null");
+        var b = (r.stdout || '').replace(/\s+/g, '');
+        var mime = b ? iconMime(b) : '';
+        if (mime) {
+          iconCache[pkg] = 'data:' + mime + ';base64,' + b;
+          paintIcon(pkg, iconCache[pkg]);
+        }
+      }
+    }
+    if (iconQueue.length) iconTimer = setTimeout(pumpIcons, 20);
+  }
+
+  function queueVisibleIcons() {
+    var box = $('pickList');
+    if (!box || !box.children || !box.getBoundingClientRect) return;
+    var br = box.getBoundingClientRect();
+    var pkgs = [];
+    for (var i = 0; i < box.children.length; i++) {
+      var el = box.children[i];
+      if (!el.getAttribute || !el.getBoundingClientRect) continue;
+      var r = el.getBoundingClientRect();
+      // 行是按顺序排的，滚过可视区尽头就可以停，不必把几百行都算一遍
+      if (r.top > br.bottom + 160) break;
+      if (r.bottom < br.top - 80) continue;
+      var pkg = el.getAttribute('data-pkg');
+      if (!pkg || iconSrc[pkg] || iconDead[pkg]) continue;
+      if (pkgs.indexOf(pkg) < 0) pkgs.push(pkg);
+    }
+    queueIcons(pkgs);
+  }
+
+  function loadIconIndex() {
+    if (iconIndexLoaded || !hasKsu()) return;
+    var r = sh("cat '" + ICON_INDEX + "' 2>/dev/null");
+    var text = (r.stdout || '');
+    if (!text.trim()) return;
+    text.split('\n').forEach(function (line) {
+      var t = line.replace(/\r$/, '').trim();
+      if (!t) return;
+      var i = t.indexOf('\t');
+      if (i <= 0) return;
+      var pkg = t.slice(0, i).trim();
+      var fn = t.slice(i + 1).trim();
+      if (validPkgName(pkg) && fn) iconIndex[pkg] = fn;
+    });
+    iconIndexLoaded = true;
+  }
+
+  function applyNames(text) {
+    var changed = false;
+    (text || '').split('\n').forEach(function (line) {
+      var t = line.replace(/\r$/, '').trim();
+      if (!t || t.charAt(0) === '#') return;
+      var i = t.indexOf('\t');
+      if (i <= 0) return;
+      var pkg = t.slice(0, i).trim();
+      var name = t.slice(i + 1).trim();
+      if (!validPkgName(pkg) || !name) return;
+      if (nameMap[pkg] !== name) { nameMap[pkg] = name; changed = true; }
+    });
+    if (changed && installedList) {
+      installedList.forEach(function (it) {
+        if (!it.name && nameMap[it.pkg]) it.name = nameMap[it.pkg];
+      });
+      if (pickerOpen) renderPicker();
+    }
+    return changed;
+  }
+
+  // 守护进程 --labels 生成 pkg<TAB>名称，缓存在模块目录，下次直接读
+  function loadNameCache() {
+    if (!hasKsu()) return false;
+    var r = sh("if [ -f '" + NAME_CACHE + "' ]; then cat '" + NAME_CACHE + "'; echo __EXISTS__; fi");
+    var out = (r.stdout || '');
+    if (out.indexOf('__EXISTS__') < 0) return false;
+    applyNames(out.replace(/__EXISTS__/g, ''));
+    return true;
+  }
+
+  function startNameScan() {
+    if (nameScanning || !hasKsu()) return;
+    if (!hasBinary()) {
+      $('pickHint').textContent = '模块文件不完整（缺 App_screen_off），识别不了名称和图标';
+      return;
+    }
+    nameScanning = true;
+    scanTried = true;
+    sh("touch '" + MOD + "/.scan'");
+    if (pickerOpen) $('pickHint').textContent = '正在识别应用名称…（首次约 10 秒）';
+
+    var tries = 0;
+    var sawPart = false;
+    var spawned = false;
+    var timer = setInterval(function () {
+      tries++;
+      var r = sh("cat '" + NAME_CACHE + ".part' 2>/dev/null; if [ -f '" + NAME_CACHE + "' ] && [ -f '" + ICON_INDEX + "' ]; then echo __DONE__; fi");
+      var out = (r.stdout || '');
+      var done = out.indexOf('__DONE__') >= 0;
+      out = out.replace(/__DONE__/g, '');
+      if (out) sawPart = true;
+      // 守护进程没在跑时，自己拉起一个扫描；已有 .scan.lock 就不再起第二个
+      if (!sawPart && !spawned && tries === 8) {
+        var lk = sh("test -f '" + MOD + "/.scan.lock' && echo 1");
+        if ((lk.stdout || '').trim() !== '1') {
+          spawned = true;
+          sh("rm -f '" + MOD + "/.scan'");
+          sh("(nohup '" + MOD + "/App_screen_off' --scan='" + MOD + "' >/dev/null 2>&1 &)");
+        }
+      }
+      applyNames(out);
+      if (done) {
+        clearInterval(timer);
+        nameScanning = false;
+        iconIndexLoaded = false;
+        iconAsked = {};
+        iconDead = {};
+        loadIconIndex();
+        if (pickerOpen) renderPicker();
+        return;
+      }
+      if (tries >= 80) {
+        clearInterval(timer);
+        nameScanning = false;
+        sh("rm -f '" + MOD + "/.scan'");
+        if (pickerOpen) $('pickHint').textContent = '识别超时，已停止后台扫描，可点「重新读取」重试';
+      }
+    }, 1500);
+  }
+
+  function fillPicker(force) {
+    $('pickHint').textContent = '正在读取已安装应用…';
+    setPickCount(0);
+    $('pickList').innerHTML = '';
+    setTimeout(function () {
+      var list = loadInstalled(force);
+      if (!list.length) {
+        $('pickHint').textContent = '这台机器读不到已安装应用列表，直接在上面输入包名即可';
+        return;
+      }
+      renderPicker();
+      refreshEntryNames();
+    }, 40);
+  }
+
+
+  // 进页面时就把「已配置应用」的名称和图标补齐，不依赖打开应用列表
+  function primeEntryNames() {
+    if (!entries.length || !hasKsu()) return;
+    var pkgs = [];
+    entries.forEach(function (e) { if (!e.name) pkgs.push(e.pkg); });
+    if (!pkgs.length) return;
+
+    var labels = nativeLabels(pkgs);
+    var changed = false;
+    entries.forEach(function (e) {
+      if (e.name) return;
+      var nm = (labels && labels[e.pkg]) || PRESETS[e.pkg] || nameMap[e.pkg];
+      if (nm) { e.name = nm; changed = true; }
+    });
+    if (changed) render();
+    if (labels || !hasBinary()) return;
+
+    // 管理器没有原生接口时，逐个问守护进程 --label
+    var i = 0;
+    (function step() {
+      if (i >= pkgs.length) return;
+      var pkg = pkgs[i++];
+      if (entryNameTried[pkg]) { setTimeout(step, 0); return; }
+      entryNameTried[pkg] = 1;
+      var r = sh("'" + MOD + "/App_screen_off' --label='" + pkg + "' 2>/dev/null");
+      var nm = (r.stdout || '').split('\n')[0].trim();
+      if (nm && nm.length < 80) {
+        var hit = false;
+        entries.forEach(function (e) { if (e.pkg === pkg && !e.name) { e.name = nm; hit = true; } });
+        if (hit) render();
+      }
+      setTimeout(step, 16);
+    })();
+  }
+
+  // 优先给已配置的应用拿图标：原生协议 → 缓存文件 → 现场解包（--icon），不等整机扫描
+  function prefetchEntryIcons() {
+    if (!entries.length || !hasKsu()) return;
+
+    var todo = [];
+    entries.forEach(function (e) {
+      var pkg = e.pkg;
+      if (iconSrc[pkg] || iconDead[pkg]) return;
+      if (iconCache[pkg]) { paintIcon(pkg, iconCache[pkg]); return; }
+      if (nativeIconOk >= 0) { paintIcon(pkg, 'ksu://icon/' + pkg); return; }
+      if (iconIndex[pkg]) { queueIcons([pkg]); return; }
+      if (entryIconTried[pkg] || !hasBinary()) return;
+      todo.push(pkg);
+    });
+    if (!todo.length) return;
+
+    var i = 0;
+    (function step() {
+      if (i >= todo.length) return;
+      var pkg = todo[i++];
+      entryIconTried[pkg] = 1;
+      var r = sh("'" + MOD + "/App_screen_off' --icon='" + pkg + "' 2>/dev/null");
+      var b = (r.stdout || '').replace(/\s+/g, '');
+      var mime = b ? iconMime(b) : '';
+      if (mime) {
+        iconCache[pkg] = 'data:' + mime + ';base64,' + b;
+        paintIcon(pkg, iconCache[pkg]);
+      }
+      setTimeout(step, 16);
+    })();
+  }
+
+  function refreshEntryNames() {
+    var changed = false;
+    entries.forEach(function (e) {
+      if (!e.name && pkgName[e.pkg]) {
+        e.name = pkgName[e.pkg];
+        changed = true;
+      }
+    });
+    if (changed) {
+      dirty = true;
+      render();
+    }
+  }
+
+  function togglePicker() {
+    pickerOpen = !pickerOpen;
+    $('picker').hidden = !pickerOpen;
+    $('pickBtn').textContent = pickerOpen ? '收起列表' : '选择应用';
+    if (!pickerOpen) return;
+
+    if (!hasKsu()) {
+      $('pickHint').textContent = '当前环境没有执行权限，读不到应用列表';
+      return;
+    }
+    fillPicker(false);
+    var hasNames = loadNameCache();
+    loadIconIndex();
+    if (!nativePm() && (!hasNames || !iconIndexLoaded) && !scanTried) startNameScan();
+    queueVisibleIcons();
+  }
+
+  function reloadPicker() {
+    pickLetter = '';
+    installedList = null;
+    nameMap = {};
+    iconIndex = {};
+    iconCache = {};
+    iconSrc = {};
+    iconAsked = {};
+    iconDead = {};
+    iconQueue = [];
+    iconIndexLoaded = false;
+    if (hasKsu()) sh("rm -rf '" + ICON_DIR + "' '" + NAME_CACHE + "'");
+    fillPicker(true);
+    startNameScan();
   }
 
   function save() {
@@ -899,14 +1777,16 @@
 
   function stop() {
     if (!hasKsu()) return;
-    sh("kill $(cat '" + MOD + "/.supervisor.pid' 2>/dev/null | awk '{print $2}') 2>/dev/null; killall -15 App_screen_off 2>/dev/null");
+    sh("kill $(cat '" + MOD + "/.supervisor.pid' 2>/dev/null | awk '{print $2}') 2>/dev/null; killall -15 App_screen_off 2>/dev/null; "
+      + "i=4; while [ -n \"$(pidof App_screen_off)\" ] && [ $i -gt 0 ]; do sleep 1; i=$((i-1)); done; "
+      + "killall -9 App_screen_off 2>/dev/null; rm -f '" + MOD + "/.daemon.lock' '" + MOD + "/.scan.lock' '" + MOD + "/.scan'");
     toast('已停止（重新启用模块或重启可恢复）');
     setTimeout(refreshStatus, 1200);
   }
 
   $('saveBtn').onclick = save;
   $('importBtn').onclick = importDownload;
-  $('backupBtn').onclick = restoreBackup;
+  $('exportCfgBtn').onclick = exportBackup;
   $('refreshBtn').onclick = function () { refreshStatus(); toast('已刷新'); };
   $('logToggle').onclick = function () { setLogCollapsed(!$('logBox').classList.contains('collapsed')); };
   $('testOffBtn').onclick = testOff;
@@ -914,6 +1794,15 @@
   $('stopBtn').onclick = stop;
   $('diagBtn').onclick = runDiag;
   $('pkgAdd').onclick = manualAdd;
+  $('pickBtn').onclick = togglePicker;
+  $('pickReload').onclick = reloadPicker;
+  $('pickSearch').oninput = renderPicker;
+  var iconScrollTick = false;
+  $('pickList').onscroll = function () {
+    if (iconScrollTick) return;
+    iconScrollTick = true;
+    setTimeout(function () { iconScrollTick = false; queueVisibleIcons(); }, 80);
+  };
   $('pkgInput').onkeydown = function (ev) {
     if (ev.key === 'Enter') { ev.preventDefault(); manualAdd(); }
   };

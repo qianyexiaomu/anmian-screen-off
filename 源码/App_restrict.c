@@ -17,6 +17,8 @@
 #include <unistd.h>
 #include <linux/input.h>
 
+#include "label_parse.h"
+
 #define MAX_PKG_LEN 256
 #define CMD_BUFFER_SIZE 8192
 #define MAX_APPS 100
@@ -38,6 +40,10 @@
 #define MAX_TIME_VALUE 100000
 
 #define RESET_GRACE_SECONDS 30
+
+/* 名称/图标扫描的上限：扫描本身到点就收手，守护进程再做一层兜底强杀 */
+#define SCAN_MAX_SECONDS 120
+#define SCAN_WATCHDOG_SECONDS 150
 
 #define MY_NBITS(x) ((((x) - 1) / (int)(sizeof(long) * 8)) + 1)
 #define BIT_TEST(nr, addr) (((1UL << ((nr) % (sizeof(long) * 8))) & (addr)[(nr) / (sizeof(long) * 8)]) != 0)
@@ -75,6 +81,10 @@ static int app_count = 0;
 static time_t last_config_mtime = 0;
 static off_t last_config_size = -1;
 
+static char module_dir[256] = {0};
+static pid_t label_child = 0;
+static time_t auto_scan_at = 0;
+static time_t label_child_start = 0;
 static char cached_top_pkg[MAX_PKG_LEN] = {0};
 static time_t last_top_pkg_time = 0;
 static int preferred_cmd = 0;
@@ -991,6 +1001,629 @@ static int run_diag(const char* config_path) {
     return 0;
 }
 
+/* ===== 应用名扫描（--labels / --label） ===== */
+
+static const char* const LP_UNZIP_TOOLS[] = {
+    "unzip",
+    "busybox unzip",
+    "/data/adb/ksu/bin/busybox unzip",
+    "/data/adb/magisk/busybox unzip",
+    "/system/bin/busybox unzip"
+};
+
+static bool lp_extract_entry(const char* apk, const char* entry, const char* out_path) {
+    for (size_t i = 0; i < sizeof(LP_UNZIP_TOOLS) / sizeof(LP_UNZIP_TOOLS[0]); i++) {
+        char cmd[1024];
+        snprintf(cmd, sizeof(cmd), "%s -p '%s' '%s' > '%s' 2>/dev/null", LP_UNZIP_TOOLS[i], apk, entry, out_path);
+        if (system(cmd) != 0) {
+            /* system() 返回的是等待状态，非 0 也可能已经解出内容，下面按文件大小判断 */
+        }
+        struct stat st;
+        if (stat(out_path, &st) == 0 && st.st_size > 0) return true;
+    }
+    return false;
+}
+
+static bool lp_valid_pkg(const char* s) {
+    if (!s || !*s) return false;
+    bool dot = false;
+    for (const char* p = s; *p; p++) {
+        if (*p == '.') {
+            dot = true;
+            continue;
+        }
+        if (!isalnum((unsigned char)*p) && *p != '_') return false;
+    }
+    return dot;
+}
+
+typedef struct {
+    char pkg[MAX_PKG_LEN];
+    char path[512];
+} LpPkgEntry;
+
+static void lp_trim(char* s) {
+    size_t n = strlen(s);
+    while (n > 0 && (s[n - 1] == '\n' || s[n - 1] == '\r' || s[n - 1] == ' ' || s[n - 1] == '\t')) s[--n] = '\0';
+}
+
+static char* lp_path_of(const char* pkg, char* out, size_t out_size) {
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd), "/system/bin/pm path '%s' 2>/dev/null", pkg);
+    FILE* fp = popen(cmd, "r");
+    if (!fp) return NULL;
+    out[0] = '\0';
+    char line[512];
+    while (fgets(line, sizeof(line), fp)) {
+        lp_trim(line);
+        const char* p = strstr(line, "package:");
+        if (p) {
+            snprintf(out, out_size, "%s", p + 8);
+            break;
+        }
+    }
+    pclose(fp);
+    return out[0] ? out : NULL;
+}
+
+static int lp_enum_packages(LpPkgEntry* list, int max) {
+    int n = 0;
+    FILE* fp = popen("/system/bin/pm list packages -f 2>/dev/null", "r");
+    if (fp) {
+        char line[1024];
+        while (fgets(line, sizeof(line), fp) && n < max) {
+            lp_trim(line);
+            char* p = strstr(line, "package:");
+            if (!p) continue;
+            p += 8;
+            char* eq = strrchr(p, '=');
+            if (!eq) continue;
+            *eq = '\0';
+            char* pkg = eq + 1;
+            if (!lp_valid_pkg(pkg)) continue;
+            snprintf(list[n].path, sizeof(list[n].path), "%s", p);
+            snprintf(list[n].pkg, sizeof(list[n].pkg), "%s", pkg);
+            n++;
+        }
+        pclose(fp);
+    }
+    if (n > 0) return n;
+
+    /* 有些 ROM 的 pm 不认 -f：退回逐个 pm path */
+    fp = popen("/system/bin/pm list packages 2>/dev/null", "r");
+    if (!fp) return 0;
+    char line[512];
+    while (fgets(line, sizeof(line), fp) && n < max) {
+        lp_trim(line);
+        const char* p = strstr(line, "package:");
+        if (!p) continue;
+        const char* pkg = p + 8;
+        if (!lp_valid_pkg(pkg)) continue;
+        char path[512];
+        if (!lp_path_of(pkg, path, sizeof(path))) continue;
+        snprintf(list[n].path, sizeof(list[n].path), "%s", path);
+        snprintf(list[n].pkg, sizeof(list[n].pkg), "%s", pkg);
+        n++;
+    }
+    pclose(fp);
+    return n;
+}
+
+static bool lp_load_framework(unsigned char** buf, size_t* size) {
+    *buf = NULL;
+    *size = 0;
+    char path[128];
+    snprintf(path, sizeof(path), "/data/local/tmp/.anmian_fw_%d", (int)getpid());
+    if (!lp_extract_entry("/system/framework/framework-res.apk", "resources.arsc", path)) return false;
+    bool ok = lp_read_file(path, buf, size);
+    unlink(path);
+    return ok;
+}
+
+static bool lp_resolve_apk(const char* apk, const unsigned char* fw, size_t fw_size, char* out, size_t out_size) {
+    char mpath[128], rpath[128];
+    snprintf(mpath, sizeof(mpath), "/data/local/tmp/.anmian_lm_%d", (int)getpid());
+    snprintf(rpath, sizeof(rpath), "/data/local/tmp/.anmian_lr_%d", (int)getpid());
+
+    bool ok = false;
+    if (lp_extract_entry(apk, "AndroidManifest.xml", mpath) && lp_extract_entry(apk, "resources.arsc", rpath)) {
+        unsigned char *mb = NULL, *rb = NULL;
+        size_t mn = 0, rn = 0;
+        if (lp_read_file(mpath, &mb, &mn) && lp_read_file(rpath, &rb, &rn)) {
+            ok = lp_apk_label(mb, mn, rb, rn, fw, fw_size, out, out_size);
+        }
+        free(mb);
+        free(rb);
+    }
+    unlink(mpath);
+    unlink(rpath);
+    return ok;
+}
+
+static bool lp_icon_lookup(const char* base_apk, const char* pkg, const unsigned char* mb, size_t mn,
+                           const unsigned char* rb, size_t rn, char* apk_out, size_t apk_out_size, char* entry_out,
+                           size_t entry_size);
+
+/* ===== 单实例锁：保证同一时间只有一个扫描、一个守护进程 ===== */
+
+static char scan_lock_file[320] = {0};
+static char daemon_lock_file[320] = {0};
+
+static int read_lock_pid(const char* path) {
+    FILE* fp = fopen(path, "r");
+    if (!fp) return 0;
+    int pid = 0;
+    if (fscanf(fp, "%d", &pid) != 1) pid = 0;
+    fclose(fp);
+    return pid;
+}
+
+static bool pid_alive(int pid) {
+    if (pid <= 0) return false;
+    if (kill(pid, 0) == 0) return true;
+    return errno == EPERM;
+}
+
+/* PID 可能被系统复用：确认这个 pid 真的是本程序，才认为锁还有效 */
+static bool pid_is_ours(int pid) {
+    char path[64];
+    snprintf(path, sizeof(path), "/proc/%d/comm", pid);
+    FILE* fp = fopen(path, "r");
+    if (!fp) return pid_alive(pid);
+    char comm[64] = {0};
+    bool ours = false;
+    if (fgets(comm, sizeof(comm), fp)) {
+        size_t n = strlen(comm);
+        while (n > 0 && (comm[n - 1] == '\n' || comm[n - 1] == '\r')) comm[--n] = '\0';
+        ours = strcmp(comm, "App_screen_off") == 0;
+    }
+    fclose(fp);
+    return ours;
+}
+
+/* 拿不到锁返回 false；持有者进程已经不在时清掉陈旧锁再试一次 */
+static bool lock_acquire(const char* path, char* keep, size_t keep_size) {
+    for (int attempt = 0; attempt < 2; attempt++) {
+        int fd = open(path, O_CREAT | O_EXCL | O_WRONLY, 0644);
+        if (fd >= 0) {
+            char buf[32];
+            int n = snprintf(buf, sizeof(buf), "%d\n", (int)getpid());
+            if (n > 0) {
+                ssize_t wr = write(fd, buf, (size_t)n);
+                (void)wr;
+            }
+            close(fd);
+            if (keep && keep_size) snprintf(keep, keep_size, "%s", path);
+            return true;
+        }
+        /* 建不了锁文件（目录只读、空间满等）时不要挡住启动，监控优先 */
+        if (errno != EEXIST) return true;
+        int pid = read_lock_pid(path);
+        if (pid_is_ours(pid)) return false;
+        if (unlink(path) != 0 && errno != ENOENT) return true;
+    }
+    return true;
+}
+
+static void lock_release(char* keep) {
+    if (keep && keep[0]) {
+        unlink(keep);
+        keep[0] = '\0';
+    }
+}
+
+static void daemon_lock_release(void) {
+    lock_release(daemon_lock_file);
+}
+
+static int run_scan_impl(const char* dir);
+
+static int run_scan(const char* dir) {
+    if (!dir || !*dir) return 1;
+    char lock[320];
+    snprintf(lock, sizeof(lock), "%s/.scan.lock", dir);
+    if (!lock_acquire(lock, scan_lock_file, sizeof(scan_lock_file))) {
+        fprintf(stderr, "已有扫描在进行，跳过\n");
+        return 0;
+    }
+
+    /* 扫描只是后台补充信息，主动让出 CPU，息屏判断始终优先 */
+    nice(10);
+
+    int rc = run_scan_impl(dir);
+    lock_release(scan_lock_file);
+    return rc;
+}
+
+static const char* lp_icon_ext(const char* path) {
+    if (lp_ends_with_ci(path, ".png")) return ".png";
+    if (lp_ends_with_ci(path, ".webp")) return ".webp";
+    if (lp_ends_with_ci(path, ".jpg")) return ".jpg";
+    return ".png";
+}
+
+/* 一次扫描：应用名写 <dir>应用名称.tsv，图标写到 <dir>图标/，索引写 index.tsv */
+static int run_scan_impl(const char* dir) {
+    if (!dir || !*dir) return 1;
+
+    char icons_dir[300];
+    snprintf(icons_dir, sizeof(icons_dir), "%s图标", dir);
+    mkdir(icons_dir, 0755);
+
+    char names[300], names_tmp[320], index[320], index_tmp[340];
+    snprintf(names, sizeof(names), "%s应用名称.tsv", dir);
+    snprintf(names_tmp, sizeof(names_tmp), "%s.part", names);
+    snprintf(index, sizeof(index), "%s/index.tsv", icons_dir);
+    snprintf(index_tmp, sizeof(index_tmp), "%s.part", index);
+
+    FILE* nfp = fopen(names_tmp, "w");
+    FILE* ifp = fopen(index_tmp, "w");
+    if (!nfp || !ifp) {
+        if (nfp) fclose(nfp);
+        if (ifp) fclose(ifp);
+        return 3;
+    }
+
+    LpPkgEntry* list = (LpPkgEntry*)calloc(600, sizeof(LpPkgEntry));
+    if (!list) {
+        fclose(nfp);
+        fclose(ifp);
+        return 2;
+    }
+
+    int n = lp_enum_packages(list, 600);
+    if (n <= 0) {
+        fprintf(stderr, "读取应用列表失败\n");
+        free(list);
+        fclose(nfp);
+        fclose(ifp);
+        rename(names_tmp, names);
+        rename(index_tmp, index);
+        return 2;
+    }
+
+    unsigned char* fw = NULL;
+    size_t fw_size = 0;
+    lp_load_framework(&fw, &fw_size);
+
+    char mpath[128], rpath[128], icpath[160];
+    snprintf(mpath, sizeof(mpath), "/data/local/tmp/.anmian_sm_%d", (int)getpid());
+    snprintf(rpath, sizeof(rpath), "/data/local/tmp/.anmian_sr_%d", (int)getpid());
+    snprintf(icpath, sizeof(icpath), "/data/local/tmp/.anmian_si_%d", (int)getpid());
+
+    time_t scan_started = mono_now();
+    for (int i = 0; i < n; i++) {
+        if (mono_now() - scan_started > SCAN_MAX_SECONDS) {
+            fprintf(stderr, "扫描超时（%d 秒），先保存已识别的部分\n", SCAN_MAX_SECONDS);
+            break;
+        }
+        if (!lp_extract_entry(list[i].path, "AndroidManifest.xml", mpath)) continue;
+        if (!lp_extract_entry(list[i].path, "resources.arsc", rpath)) continue;
+
+        unsigned char *mb = NULL, *rb = NULL;
+        size_t mn = 0, rn = 0;
+        if (!lp_read_file(mpath, &mb, &mn) || !lp_read_file(rpath, &rb, &rn)) {
+            free(mb);
+            free(rb);
+            continue;
+        }
+
+        char label[LP_MAX_STR];
+        if (lp_apk_label(mb, mn, rb, rn, fw, fw_size, label, sizeof(label))) {
+            fprintf(nfp, "%s\t%s\n", list[i].pkg, label);
+            fflush(nfp);
+        }
+
+        char icon_apk[512], icon_entry[LP_MAX_STR];
+        if (lp_icon_lookup(list[i].path, list[i].pkg, mb, mn, rb, rn, icon_apk, sizeof(icon_apk), icon_entry,
+                           sizeof(icon_entry))) {
+            char file_name[LP_MAX_STR];
+            snprintf(file_name, sizeof(file_name), "%s%s", list[i].pkg, lp_icon_ext(icon_entry));
+            char out_path[600];
+            snprintf(out_path, sizeof(out_path), "%s/%s", icons_dir, file_name);
+            if (lp_extract_entry(icon_apk, icon_entry, out_path)) {
+                struct stat st;
+                if (stat(out_path, &st) == 0 && st.st_size > 0) {
+                    fprintf(ifp, "%s\t%s\n", list[i].pkg, file_name);
+                    fflush(ifp);
+                } else {
+                    unlink(out_path);
+                }
+            }
+        }
+
+        free(mb);
+        free(rb);
+    }
+
+    unlink(mpath);
+    unlink(rpath);
+    unlink(icpath);
+    free(fw);
+    free(list);
+
+    fclose(nfp);
+    fclose(ifp);
+    rename(names_tmp, names);
+    rename(index_tmp, index);
+    return 0;
+}
+
+/* 一个包可能有 base + 多个 split APK，图标常在 split 里 */
+static int lp_paths_of(const char* pkg, char paths[][512], int max) {
+    char cmd[512];
+    snprintf(cmd, sizeof(cmd), "/system/bin/pm path '%s' 2>/dev/null", pkg);
+    FILE* fp = popen(cmd, "r");
+    if (!fp) return 0;
+    int n = 0;
+    char line[512];
+    while (fgets(line, sizeof(line), fp) && n < max) {
+        lp_trim(line);
+        const char* p = strstr(line, "package:");
+        if (!p) continue;
+        snprintf(paths[n], 512, "%s", p + 8);
+        n++;
+    }
+    pclose(fp);
+    return n;
+}
+
+/* 在 base 与所有 split 里找图标位图，返回所在 APK 与内部路径 */
+static bool lp_icon_lookup(const char* base_apk, const char* pkg, const unsigned char* mb, size_t mn,
+                           const unsigned char* rb, size_t rn, char* apk_out, size_t apk_out_size, char* entry_out,
+                           size_t entry_size) {
+    uint32_t refs[2] = {0, 0};
+    int nr = 0;
+    LpLabel ic;
+    if (lp_axml_attr(mb, mn, "icon", 0x01010002, &ic) && ic.ref) refs[nr++] = ic.ref;
+    LpLabel ri;
+    if (lp_axml_attr(mb, mn, "roundIcon", 0x0101052c, &ri) && ri.ref && ri.ref != refs[0]) refs[nr++] = ri.ref;
+    if (!nr) return false;
+
+    LpTable t;
+    if (rb && rn && lp_arsc_init(&t, rb, rn)) {
+        for (int i = 0; i < nr; i++) {
+            if (lp_arsc_file_path(&t, refs[i], entry_out, entry_size)) {
+                snprintf(apk_out, apk_out_size, "%s", base_apk);
+                return true;
+            }
+        }
+    }
+
+    static char paths[12][512];
+    int np = lp_paths_of(pkg, paths, 12);
+    for (int k = 0; k < np; k++) {
+        if (strcmp(paths[k], base_apk) == 0) continue;
+        char rp[128];
+        snprintf(rp, sizeof(rp), "/data/local/tmp/.anmian_sx_%d", (int)getpid());
+        if (!lp_extract_entry(paths[k], "resources.arsc", rp)) continue;
+        unsigned char* b = NULL;
+        size_t bn = 0;
+        bool ok = lp_read_file(rp, &b, &bn);
+        unlink(rp);
+        if (!ok) continue;
+
+        LpTable st;
+        bool found = false;
+        if (lp_arsc_init(&st, b, bn)) {
+            for (int i = 0; i < nr; i++) {
+                if (lp_arsc_file_path(&st, refs[i], entry_out, entry_size)) {
+                    found = true;
+                    break;
+                }
+            }
+        }
+        free(b);
+        if (found) {
+            snprintf(apk_out, apk_out_size, "%s", paths[k]);
+            return true;
+        }
+    }
+    return false;
+}
+
+static int run_icon_debug(const char* pkg) {
+    char base[512];
+    printf("pkg=%s\n", pkg);
+    if (!lp_path_of(pkg, base, sizeof(base))) {
+        printf("apk: not found\n");
+        return 2;
+    }
+    printf("base=%s\n", base);
+
+    static char paths[12][512];
+    int np = lp_paths_of(pkg, paths, 12);
+    printf("apks=%d\n", np);
+
+    char mpath[128], rpath[128];
+    snprintf(mpath, sizeof(mpath), "/data/local/tmp/.anmian_dm_%d", (int)getpid());
+    snprintf(rpath, sizeof(rpath), "/data/local/tmp/.anmian_dr_%d", (int)getpid());
+    if (!lp_extract_entry(base, "AndroidManifest.xml", mpath) || !lp_extract_entry(base, "resources.arsc", rpath)) {
+        printf("extract: failed (unzip?)\n");
+        return 3;
+    }
+    unsigned char *mb = NULL, *rb = NULL;
+    size_t mn = 0, rn = 0;
+    if (!lp_read_file(mpath, &mb, &mn) || !lp_read_file(rpath, &rb, &rn)) {
+        printf("read: failed\n");
+        return 4;
+    }
+
+    LpLabel ic;
+    LpLabel ri;
+    bool has_ic = lp_axml_attr(mb, mn, "icon", 0x01010002, &ic);
+    bool has_ri = lp_axml_attr(mb, mn, "roundIcon", 0x0101052c, &ri);
+    printf("icon: %s ref=0x%08x lit=%s\n", has_ic ? "yes" : "no", has_ic ? ic.ref : 0,
+           (has_ic && ic.has_literal) ? ic.literal : "-");
+    printf("roundIcon: %s ref=0x%08x\n", has_ri ? "yes" : "no", has_ri ? ri.ref : 0);
+
+    uint32_t refs[2] = {0, 0};
+    int nr = 0;
+    if (has_ic && ic.ref) refs[nr++] = ic.ref;
+    if (has_ri && ri.ref && ri.ref != refs[0]) refs[nr++] = ri.ref;
+
+    for (int k = 0; k < np; k++) {
+        unsigned char* b = rb;
+        size_t bn = rn;
+        bool own = false;
+        if (strcmp(paths[k], base) != 0) {
+            char sp[128];
+            snprintf(sp, sizeof(sp), "/data/local/tmp/.anmian_ds_%d", (int)getpid());
+            if (!lp_extract_entry(paths[k], "resources.arsc", sp)) {
+                printf("  %s: no arsc\n", paths[k]);
+                continue;
+            }
+            b = NULL;
+            bn = 0;
+            own = lp_read_file(sp, &b, &bn);
+            unlink(sp);
+            if (!own) continue;
+        }
+        LpTable t;
+        if (lp_arsc_init(&t, b, bn)) {
+            for (int i = 0; i < nr; i++) {
+                char entry[LP_MAX_STR];
+                if (lp_arsc_file_path(&t, refs[i], entry, sizeof(entry))) {
+                    printf("  %s: %s\n", paths[k], entry);
+                }
+            }
+        }
+        if (own) free(b);
+    }
+
+    char apk[512], entry[LP_MAX_STR];
+    bool ok = lp_icon_lookup(base, pkg, mb, mn, rb, rn, apk, sizeof(apk), entry, sizeof(entry));
+    printf("result: %s\n", ok ? entry : "not found");
+    if (ok) printf("in: %s\n", apk);
+    free(mb);
+    free(rb);
+    unlink(mpath);
+    unlink(rpath);
+    return ok ? 0 : 5;
+}
+
+static int run_icon(const char* pkg) {
+    char base[512];
+    if (!lp_path_of(pkg, base, sizeof(base))) return 2;
+
+    char mpath[128], rpath[128];
+    snprintf(mpath, sizeof(mpath), "/data/local/tmp/.anmian_im_%d", (int)getpid());
+    snprintf(rpath, sizeof(rpath), "/data/local/tmp/.anmian_ir_%d", (int)getpid());
+    if (!lp_extract_entry(base, "AndroidManifest.xml", mpath) || !lp_extract_entry(base, "resources.arsc", rpath)) {
+        unlink(mpath);
+        unlink(rpath);
+        return 3;
+    }
+    unsigned char *mb = NULL, *rb = NULL;
+    size_t mn = 0, rn = 0;
+    if (!lp_read_file(mpath, &mb, &mn) || !lp_read_file(rpath, &rb, &rn)) {
+        free(mb);
+        free(rb);
+        unlink(mpath);
+        unlink(rpath);
+        return 4;
+    }
+    unlink(mpath);
+    unlink(rpath);
+
+    char apk[512], entry[LP_MAX_STR];
+    bool found = lp_icon_lookup(base, pkg, mb, mn, rb, rn, apk, sizeof(apk), entry, sizeof(entry));
+    free(mb);
+    free(rb);
+    if (!found) return 5;
+
+    char icon_path[128];
+    snprintf(icon_path, sizeof(icon_path), "/data/local/tmp/.anmian_ic_%d", (int)getpid());
+    if (!lp_extract_entry(apk, entry, icon_path)) return 6;
+
+    unsigned char* buf = NULL;
+    size_t n = 0;
+    bool ok = lp_read_file(icon_path, &buf, &n);
+    unlink(icon_path);
+    if (!ok || n < 16) {
+        free(buf);
+        return 7;
+    }
+    lp_b64_out(buf, n);
+    free(buf);
+    return 0;
+}
+
+static int run_label_one(const char* pkg) {
+    char path[512];
+    if (!lp_path_of(pkg, path, sizeof(path))) {
+        fprintf(stderr, "找不到应用 %s\n", pkg);
+        return 2;
+    }
+    unsigned char* fw = NULL;
+    size_t fw_size = 0;
+    lp_load_framework(&fw, &fw_size);
+
+    char label[LP_MAX_STR];
+    bool ok = lp_resolve_apk(path, fw, fw_size, label, sizeof(label));
+    free(fw);
+    if (!ok) return 3;
+    printf("%s\n", label);
+    return 0;
+}
+
+static void set_module_dir(const char* config_path) {
+    module_dir[0] = '\0';
+    if (!config_path) return;
+    const char* slash = strrchr(config_path, '/');
+    if (!slash) return;
+    size_t n = (size_t)(slash - config_path) + 1;
+    if (n >= sizeof(module_dir)) n = sizeof(module_dir) - 1;
+    memcpy(module_dir, config_path, n);
+    module_dir[n] = '\0';
+}
+
+/* WebUI 点「读取应用名」时 touch .labels，这里 fork 一个子进程去扫，主循环不阻塞 */
+static void start_scan(void) {
+    pid_t pid = fork();
+    if (pid == 0) {
+        run_scan(module_dir);
+        _exit(0);
+    }
+    if (pid > 0) {
+        label_child = pid;
+        label_child_start = mono_now();
+        LOG_I("开始扫描应用名称与图标");
+    } else {
+        LOG_W("无法创建扫描进程: %s", strerror(errno));
+    }
+}
+
+static void handle_label_request(void) {
+    if (!module_dir[0]) return;
+
+    char trigger[300];
+    snprintf(trigger, sizeof(trigger), "%s.scan", module_dir);
+    bool requested = (access(trigger, F_OK) == 0);
+    if (requested) unlink(trigger);
+
+    /* 回收上一次扫描的子进程，避免僵尸进程；还在跑就不再起新的 */
+    if (label_child > 0) {
+        int st = 0;
+        pid_t r = waitpid(label_child, &st, WNOHANG);
+        if (r == label_child || (r < 0 && errno == ECHILD)) {
+            label_child = 0;
+            label_child_start = 0;
+        } else {
+            if (label_child_start > 0 && mono_now() - label_child_start > SCAN_WATCHDOG_SECONDS) {
+                LOG_W("扫描超过 %d 秒，强制结束", SCAN_WATCHDOG_SECONDS);
+                kill(label_child, SIGKILL);
+                waitpid(label_child, &st, 0);
+                label_child = 0;
+                label_child_start = 0;
+            }
+            return;
+        }
+    }
+
+    if (requested) start_scan();
+}
+
 static long elapsed_ms(const struct timespec* since) {
     struct timespec now;
     clock_gettime(CLOCK_MONOTONIC, &now);
@@ -999,6 +1632,10 @@ static long elapsed_ms(const struct timespec* since) {
 
 int main(int argc, char* argv[]) {
     const char* config_path = NULL;
+    const char* scan_dir = NULL;
+    const char* label_pkg = NULL;
+    const char* icon_pkg = NULL;
+    const char* icon_debug_pkg = NULL;
     bool diag = false;
     bool test_off = false;
 
@@ -1013,10 +1650,22 @@ int main(int argc, char* argv[]) {
             diag = true;
         } else if (strcmp(argv[i], "--test-off") == 0) {
             test_off = true;
+        } else if (strncmp(argv[i], "--scan=", 7) == 0) {
+            scan_dir = argv[i] + 7;
+        } else if (strncmp(argv[i], "--label=", 8) == 0) {
+            label_pkg = argv[i] + 8;
+        } else if (strncmp(argv[i], "--icon-debug=", 13) == 0) {
+            icon_debug_pkg = argv[i] + 13;
+        } else if (strncmp(argv[i], "--icon=", 7) == 0) {
+            icon_pkg = argv[i] + 7;
         }
     }
 
     if (test_off) return run_test_off();
+    if (icon_debug_pkg) return run_icon_debug(icon_debug_pkg);
+    if (icon_pkg) return run_icon(icon_pkg);
+    if (label_pkg) return run_label_one(label_pkg);
+    if (scan_dir) return run_scan(scan_dir);
     if (diag) return run_diag(config_path);
 
     if (!config_path) {
@@ -1044,6 +1693,30 @@ int main(int argc, char* argv[]) {
     if (stat(config_path, &st) == 0) {
         last_config_mtime = st.st_mtime;
         last_config_size = st.st_size;
+    }
+
+    set_module_dir(config_path);
+
+    if (module_dir[0]) {
+        char lock[320];
+        snprintf(lock, sizeof(lock), "%s.daemon.lock", module_dir);
+        if (!lock_acquire(lock, daemon_lock_file, sizeof(daemon_lock_file))) {
+            LOG_W("已有守护进程在运行，本进程退出（%s）", lock);
+            fprintf(stderr, "已有守护进程在运行，本进程退出\n");
+            return 0;
+        }
+        atexit(daemon_lock_release);
+        LOG_I("守护进程启动 pid=%d", (int)getpid());
+    }
+
+    {
+        char names_cache[300], icon_index[340];
+        snprintf(names_cache, sizeof(names_cache), "%s应用名称.tsv", module_dir);
+        snprintf(icon_index, sizeof(icon_index), "%s图标/index.tsv", module_dir);
+        if (access(names_cache, F_OK) != 0 || access(icon_index, F_OK) != 0) {
+            auto_scan_at = mono_now() + 15;
+            LOG_I("还没有名称/图标缓存，15 秒后后台扫描");
+        }
     }
 
     int cfg_rc = load_config(config_path, true);
@@ -1105,6 +1778,12 @@ int main(int argc, char* argv[]) {
                 LOG_I("配置已重新加载，共 %d 个应用", app_count);
             }
         }
+
+        if (auto_scan_at > 0 && mono_now() >= auto_scan_at && screen_on) {
+            auto_scan_at = 0;
+            if (label_child == 0) start_scan();
+        }
+        handle_label_request();
 
         if (app_count == 0) {
 

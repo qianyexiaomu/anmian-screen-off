@@ -38,6 +38,15 @@ wait_sys_boot_completed
 kill_old_supervisor
 killall -15 App_screen_off >/dev/null 2>&1
 
+# 等旧实例退干净，仍不退的强杀，避免留下两个守护进程或半截的扫描
+i=4
+while [ -n "$(pidof App_screen_off)" ] && [ "${i}" -gt 0 ]; do
+	sleep 1
+	i=$((i - 1))
+done
+killall -9 App_screen_off >/dev/null 2>&1
+rm -f "${MODDIR}/.daemon.lock" "${MODDIR}/.scan.lock" "${MODDIR}/.scan"
+
 [ -f "${MODDIR}/App_screen_off" ] || exit 1
 chmod 0755 "${MODDIR}/App_screen_off" >/dev/null 2>&1
 

@@ -9,7 +9,7 @@
 <p align="center">  
   <img src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android\&logoColor=white" alt="Android">  
   <img src="https://img.shields.io/badge/Magisk-KernelSU-APatch-2563EB" alt="Root">  
-  <img src="https://img.shields.io/badge/version-2.5.2-0F172A" alt="version">  
+  <img src="https://img.shields.io/badge/version-2.6-0F172A" alt="version">  
   <img src="https://img.shields.io/badge/WebUI-内置-16A34A" alt="WebUI">  
 </p>
 
@@ -28,8 +28,10 @@
 | 按应用独立计时  | 每个应用单独配置时限，取值范围 1–180 分钟                |
 | 触摸检测     | 监听 `/dev/input` 输入设备，触摸即重置计时            |
 | 内置 WebUI | 在 KernelSU / APatch 管理器中直接打开，无需安装额外应用   |
-| 包名识别     | 输入包名自动显示应用名称，认不出的显示包名，不影响计时              |
+| 应用选择     | 列出全部应用，按首字母分组，右侧 A–Z 索引筛选，点一行即可加入       |
+| 名称与图标    | 优先使用管理器原生接口，不支持时解析 APK 资源并缓存，只识别一次      |
 | 配置热重载    | 保存后 10 秒内自动生效，无需重启设备                    |
+| 备份迁移     | 导出 / 导入 `/sdcard/Download/配置.prop`，换机直接拷贝 |
 | 自动诊断     | 输出可用性结论，并指明缺失环节                         |
 | 息屏测试     | 立即执行一次完整息屏流程，验证按键注入是否被系统拦截              |
 | 诊断报告     | 「诊断版」安装包专属，一键收集完整环境信息，便于反馈           |
@@ -77,14 +79,16 @@ WebUI 随模块一同安装，入口文件为 `webroot/index.html`：
 
 Releases 提供两个变体，功能完全相同，按需选择其一：
 
-- **标准版** `anmian-screen-off-2.5.2.zip`：日常使用推荐，不含详细诊断。
-- **诊断版** `anmian-screen-off-diag-2.5.2.zip`：额外支持一键生成完整环境诊断报告，遇到问题机型时使用；不带自动更新检查，更新时需手动下载。
+- **标准版** `anmian-screen-off-2.6.zip`：日常使用推荐，不含详细诊断。
+- **诊断版** `anmian-screen-off-diag-2.6.zip`：额外支持一键生成完整环境诊断报告，遇到问题机型时使用；更新走独立更新源，不会被自动替换成标准版。
 
 ## 配置
 
 ### 通过 WebUI
 
-在「已配置应用」下方输入包名并确认，应用将加入列表，默认时限 30 分钟，可通过 `－` `＋` 调整。输入常见应用（抖音、快手、哔哩哔哩、微信等）的包名时会自动显示应用名称；认不出的包名直接显示包名本身，不影响使用。修改完成后点击底部「保存配置」。
+点「选择应用」打开应用列表：全部应用按拼音首字母分组，右侧 A–Z 索引可直接筛选，点一行即加入，默认时限 30 分钟，可用 `－` `＋` 或直接输入调整。名称与图标会自动识别并缓存在模块目录，只识别一次；也可以直接在输入框手动填写包名。
+
+换机时点「导出备份」，当前列表会写入 `/sdcard/Download/配置.prop`，拷到新机器后点「导入备份」即可。修改完成后点击底部「保存配置」，10 秒内生效。
 
 ### 常见应用包名
 
@@ -109,9 +113,7 @@ package=com.smile.gifmaker
 limit_time=15m
 ```
 
-|                        |   |                                                                          |
-| ---------------------- | - | ------------------------------------------------------------------------ |
-| `limit_time` 支持 \`数字(s | m | h)` 格式：`1m` 为 1 分钟，`30s` 为 30 秒，`1h\` 为 1 小时。未指定单位时按分钟计算；整项省略时默认为 30 分钟。 |
+`limit_time` 支持 `数字(s|m|h)` 格式：`1m` 为 1 分钟，`30s` 为 30 秒，`1h` 为 1 小时。未指定单位时按分钟计算；整项省略时默认为 30 分钟。
 
 `package=` 上一行的 `#` 注释就是 WebUI 里显示的应用名，WebUI 保存时会自动写好；手写配置时留空或写错只影响显示，不影响计时。
 
@@ -147,12 +149,12 @@ su -c '/data/adb/modules/anmian_screen_off/App_screen_off --test-off'
 
 ## 诊断报告
 
-完整的环境诊断报告由 **诊断版** 安装包提供（`anmian-screen-off-diag-2.5.2.zip`，具备标准版全部功能）：
+完整的环境诊断报告由 **诊断版** 安装包提供（`anmian-screen-off-diag-2.6.zip`，具备标准版全部功能）：
 
-- 下载地址：[Releases](../../releases) 或 <https://qianyexiaomu.github.io/anmian-screen-off/dist/anmian-screen-off-diag-2.5.2.zip>
+- 下载地址：[Releases](../../releases) 或 <https://qianyexiaomu.github.io/anmian-screen-off/dist/anmian-screen-off-diag-2.6.zip>
 - 生成入口：诊断版 WebUI →「导出报告」，或管理器中本模块的「操作」按钮
 - 与标准版同模块 ID，直接刷入即可替换，配置原样保留
-- 不带自动更新检查，更新时手动下载新版即可
+- 使用独立更新源 `dist/update-diag.json`，可以正常收到诊断版更新，又不会被替换成标准版
 
 报告收集以下内容，输出到 `/sdcard/Download/anmian_diag_<时间>.txt`：
 
@@ -178,8 +180,8 @@ su -c '/data/adb/modules/anmian_screen_off/App_screen_off --test-off'
 ├── uninstall.sh          # 卸载时终止进程
 ├── customize.sh          # 安装脚本
 ├── 配置.prop              # 配置文件
-├── update.json           # 更新检查清单（模块管理器读取）
-├── dist/                 # 发布包，供 Pages 直链下载
+├── update.json           # 标准版更新清单（模块管理器读取）
+├── dist/                 # 发布包与诊断版更新清单，供 Pages 直链下载
 ├── 诊断版/                 # 诊断版模块（标准版 + 详细环境诊断报告）
 └── 源码/                  # C 源码与构建脚本
 ```
@@ -207,11 +209,13 @@ NDK=/path/to/android-ndk-r27c ./源码/build.sh
 **Anmian (安眠) · Screen-Off Manager** — a root module for Magisk / KernelSU / APatch that turns the screen off when a designated app receives no touch input for a configurable period.
 
 - Per-app limits, 1–180 minutes
+- App picker with pinyin A–Z index, automatic names and icons (cached after first scan)
 - Touch detection via evdev / epoll
 - Built-in WebUI (KernelSU / APatch; Magisk requires WebUI X)
 - Configuration hot-reload within 10 seconds
 - One-tap diagnostics with a verdict, plus a real screen-off test
-- Diagnostics variant with full environment reports
+- Backup export / import via `/sdcard/Download/配置.prop`
+- Diagnostics variant with full environment reports and its own update channel
 
 Author: **Qian Ye**.
 

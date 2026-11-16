@@ -9,7 +9,7 @@
 <p align="center">  
   <img src="https://img.shields.io/badge/Android-8.0%2B-3DDC84?logo=android\&logoColor=white" alt="Android">  
   <img src="https://img.shields.io/badge/Magisk-KernelSU-APatch-2563EB" alt="Root">  
-  <img src="https://img.shields.io/badge/version-2.5.1-0F172A" alt="version">  
+  <img src="https://img.shields.io/badge/version-2.5.2-0F172A" alt="version">  
   <img src="https://img.shields.io/badge/WebUI-内置-16A34A" alt="WebUI">  
 </p>
 
@@ -28,6 +28,7 @@
 | 按应用独立计时  | 每个应用单独配置时限，取值范围 1–180 分钟                |
 | 触摸检测     | 监听 `/dev/input` 输入设备，触摸即重置计时            |
 | 内置 WebUI | 在 KernelSU / APatch 管理器中直接打开，无需安装额外应用   |
+| 包名识别     | 输入包名自动显示应用名称，认不出的显示包名，不影响计时              |
 | 配置热重载    | 保存后 10 秒内自动生效，无需重启设备                    |
 | 自动诊断     | 输出可用性结论，并指明缺失环节                         |
 | 息屏测试     | 立即执行一次完整息屏流程，验证按键注入是否被系统拦截              |
@@ -76,14 +77,14 @@ WebUI 随模块一同安装，入口文件为 `webroot/index.html`：
 
 Releases 提供两个变体，功能完全相同，按需选择其一：
 
-- **标准版** `anmian-screen-off-2.5.1.zip`：日常使用推荐，不含详细诊断。
-- **诊断版** `anmian-screen-off-diag-2.5.1.zip`：额外支持一键生成完整环境诊断报告，遇到问题机型时使用；不带自动更新检查，更新时需手动下载。
+- **标准版** `anmian-screen-off-2.5.2.zip`：日常使用推荐，不含详细诊断。
+- **诊断版** `anmian-screen-off-diag-2.5.2.zip`：额外支持一键生成完整环境诊断报告，遇到问题机型时使用；不带自动更新检查，更新时需手动下载。
 
 ## 配置
 
 ### 通过 WebUI
 
-在「已配置应用」下方输入包名并确认，应用将加入列表，默认时限 30 分钟，可通过 `－` `＋` 调整。修改完成后点击底部「保存配置」。
+在「已配置应用」下方输入包名并确认，应用将加入列表，默认时限 30 分钟，可通过 `－` `＋` 调整。输入常见应用（抖音、快手、哔哩哔哩、微信等）的包名时会自动显示应用名称；认不出的包名直接显示包名本身，不影响使用。修改完成后点击底部「保存配置」。
 
 ### 常见应用包名
 
@@ -111,6 +112,8 @@ limit_time=15m
 |                        |   |                                                                          |
 | ---------------------- | - | ------------------------------------------------------------------------ |
 | `limit_time` 支持 \`数字(s | m | h)` 格式：`1m` 为 1 分钟，`30s` 为 30 秒，`1h\` 为 1 小时。未指定单位时按分钟计算；整项省略时默认为 30 分钟。 |
+
+`package=` 上一行的 `#` 注释就是 WebUI 里显示的应用名，WebUI 保存时会自动写好；手写配置时留空或写错只影响显示，不影响计时。
 
 ## 兼容性
 
@@ -144,9 +147,9 @@ su -c '/data/adb/modules/anmian_screen_off/App_screen_off --test-off'
 
 ## 诊断报告
 
-完整的环境诊断报告由 **诊断版** 安装包提供（`anmian-screen-off-diag-2.5.1.zip`，具备标准版全部功能）：
+完整的环境诊断报告由 **诊断版** 安装包提供（`anmian-screen-off-diag-2.5.2.zip`，具备标准版全部功能）：
 
-- 下载地址：[Releases](../../releases) 或 <https://qianyexiaomu.github.io/anmian-screen-off/dist/anmian-screen-off-diag-2.5.1.zip>
+- 下载地址：[Releases](../../releases) 或 <https://qianyexiaomu.github.io/anmian-screen-off/dist/anmian-screen-off-diag-2.5.2.zip>
 - 生成入口：诊断版 WebUI →「导出报告」，或管理器中本模块的「操作」按钮
 - 与标准版同模块 ID，直接刷入即可替换，配置原样保留
 - 不带自动更新检查，更新时手动下载新版即可

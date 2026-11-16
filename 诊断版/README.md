@@ -79,6 +79,7 @@ su -c '/data/adb/modules/anmian_screen_off/App_screen_off --diag --config=/data/
 > ### 加应用
 
 - WebUI 的「已配置应用」下面直接输入包名（例如 `com.ss.android.ugc.aweme`），回车或点「添加」，再点底部「保存配置」。
+- 输入常见应用（抖音、快手、哔哩哔哩、微信、王者荣耀等）的包名，列表里会自动显示应用名称；对照表里没有的包名会显示包名本身，不影响计时。
 - 包名可以在系统设置的「应用信息」里看，或者用 `dumpsys window | grep mCurrentFocus` 看前台应用 `u0` 后面那段。
 
 

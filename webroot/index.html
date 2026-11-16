@@ -176,7 +176,7 @@
     <div class="hint" id="srcInfo">读取中…</div>
     <div id="list"></div>
     <div class="manual">
-      <input class="search" id="pkgInput" placeholder="输入包名，如 com.ss.android.ugc.aweme">
+      <input class="search" id="pkgInput" placeholder="输入包名，常用应用自动识别名称">
       <button class="btn ghost" id="pkgAdd">添加</button>
     </div>
     <div class="hint">没有触摸达到设定时间后自动息屏；有触摸会重新计时。</div>
@@ -231,23 +231,87 @@
   var LOG = MOD + '/运行日志.log';
   var TMPOUT = '/data/local/tmp/.anmian_out';
 
+  // 包名 → 应用名，仅用于显示。字典里没有的包名会显示包名本身，
+  // 添加时再尝试从设备上读一次（见 resolveLabel）。
   var PRESETS = {
+    // 短视频 / 视频
     'com.ss.android.ugc.aweme': '抖音',
     'com.ss.android.ugc.aweme.lite': '抖音极速版',
     'com.ss.android.ugc.live': '抖音火山版',
+    'com.ss.android.article.video': '西瓜视频',
     'com.sup.android.superb': '皮皮虾',
     'com.smile.gifmaker': '快手',
     'com.kuaishou.nebula': '快手极速版',
+    'com.kwai.video': '快手概念版',
+    'com.tencent.weishi': '微视',
     'tv.danmaku.bili': '哔哩哔哩',
+    'com.bilibili.app.in': '哔哩哔哩国际版',
     'com.tencent.qqlive': '腾讯视频',
     'com.qiyi.video': '爱奇艺',
     'com.youku.phone': '优酷',
-    'com.xingin.xhs': '小红书',
+    'com.hunantv.imgo.activity': '芒果TV',
+    'com.cmcc.cmvideo': '咪咕视频',
+    'air.tv.douyu.android': '斗鱼',
+    'com.duowan.kiwi': '虎牙直播',
+    'com.google.android.youtube': 'YouTube',
+    'com.zhiliaoapp.musically': 'TikTok',
+    // 资讯 / 阅读
     'com.ss.android.article.news': '今日头条',
     'com.ss.android.article.lite': '今日头条极速版',
+    'com.tencent.news': '腾讯新闻',
+    'com.netease.newsreader.activity': '网易新闻',
+    'com.baidu.tieba': '百度贴吧',
     'com.zhihu.android': '知乎',
-    'com.tencent.weishi': '微视',
-    'com.kwai.video': '快手概念版'
+    'com.sina.weibo': '微博',
+    'com.sina.weibolite': '微博轻享版',
+    'com.xingin.xhs': '小红书',
+    'com.douban.frodo': '豆瓣',
+    'com.dragon.read': '番茄免费小说',
+    'com.kmxs.reader': '七猫免费小说',
+    'com.qidian.QDReader': '起点读书',
+    'com.jjwxc.reader': '晋江文学城',
+    // 音乐 / 音频
+    'com.netease.cloudmusic': '网易云音乐',
+    'com.tencent.qqmusic': 'QQ音乐',
+    'com.kugou.android': '酷狗音乐',
+    'cn.kuwo.player': '酷我音乐',
+    'com.ximalaya.ting.android': '喜马拉雅',
+    'com.tencent.karaoke': '全民K歌',
+    // 社交 / 通讯
+    'com.tencent.mm': '微信',
+    'com.tencent.mobileqq': 'QQ',
+    'com.tencent.wework': '企业微信',
+    'com.alibaba.android.rimet': '钉钉',
+    'com.twitter.android': 'X',
+    'com.instagram.android': 'Instagram',
+    'com.facebook.katana': 'Facebook',
+    // 游戏
+    'com.tencent.tmgp.sgame': '王者荣耀',
+    'com.tencent.tmgp.pubgmhd': '和平精英',
+    'com.tencent.tmgp.cf': '穿越火线',
+    'com.tencent.jkchess': '金铲铲之战',
+    'com.tencent.lolm': '英雄联盟手游',
+    'com.miHoYo.Yuanshen': '原神',
+    'com.miHoYo.hkrpg': '崩坏：星穹铁道',
+    'com.miHoYo.bh3': '崩坏3',
+    'com.netease.party': '蛋仔派对',
+    'com.mojang.minecraftpe': 'Minecraft',
+    // 购物 / 生活
+    'com.taobao.taobao': '淘宝',
+    'com.jingdong.app.mall': '京东',
+    'com.xunmeng.pinduoduo': '拼多多',
+    'com.taobao.idlefish': '闲鱼',
+    'com.sankuai.meituan': '美团',
+    'com.dianping.v1': '大众点评',
+    'com.eg.android.AlipayGphone': '支付宝',
+    // 浏览器 / 工具
+    'com.UCMobile': 'UC浏览器',
+    'com.quark.browser': '夸克',
+    'com.baidu.searchbox': '百度',
+    'com.tencent.mtt': 'QQ浏览器',
+    'com.android.chrome': 'Chrome',
+    'com.autonavi.minimap': '高德地图',
+    'com.baidu.BaiduMap': '百度地图'
   };
 
   var entries = [];
@@ -341,24 +405,38 @@
     n.hidden = !msg;
   }
 
-  function appName(pkg) {
-    return PRESETS[pkg] || pkg;
+  function displayName(e) {
+    return e.name || PRESETS[e.pkg] || e.pkg;
+  }
+
+  // 配置文件里 package 上一行的注释存的是应用名；文件头那几行说明性注释不能当名字。
+  function isNameComment(text) {
+    if (!text || text.length > 40) return false;
+    return !/^(应用包名|package|limit_time|由 WebUI 生成|说明)/i.test(text);
   }
 
   function parseConfig(text) {
     var out = [];
     var cur = null;
+    var pending = '';
     text.split('\n').forEach(function (raw) {
       var line = raw.replace(/\r$/, '').trim();
-      if (!line || line.charAt(0) === '#') return;
+      if (!line) return;
+      if (line.charAt(0) === '#') {
+        var c = line.replace(/^#+\s*/, '');
+        pending = isNameComment(c) ? c : '';
+        return;
+      }
       var i = line.indexOf('=');
       if (i < 0) return;
       var k = line.slice(0, i).trim();
       var v = line.slice(i + 1).trim();
       if (k === 'package') {
         if (!v) return;
-        cur = { pkg: v, limit: '30m' };
+        var nm = pending && pending !== v ? pending : '';
+        cur = { pkg: v, limit: '30m', name: nm || PRESETS[v] || '' };
         out.push(cur);
+        pending = '';
       } else if (k === 'limit_time' && cur) {
         cur.limit = v;
       }
@@ -373,7 +451,7 @@
       ''
     ];
     list.forEach(function (e) {
-      lines.push('# ' + appName(e.pkg));
+      lines.push('# ' + displayName(e));
       lines.push('package=' + e.pkg);
       lines.push('limit_time=' + parseLimitMinutes(e.limit) + 'm');
       lines.push('');
@@ -498,7 +576,7 @@
       var info = document.createElement('div');
       var nm = document.createElement('div');
       nm.className = 'app-name';
-      nm.textContent = appName(e.pkg);
+      nm.textContent = displayName(e);
       var pk = document.createElement('div');
       pk.className = 'app-pkg';
       pk.textContent = e.pkg;
@@ -538,7 +616,7 @@
           entries.unshift(item);
           dirty = true;
           render();
-          toast('已置顶 ' + appName(item.pkg));
+          toast('已置顶 ' + displayName(item));
         };
         ops.appendChild(top);
       }
@@ -712,11 +790,64 @@
       toast('这个包名已经在列表里了');
       return;
     }
-    entries.push({ pkg: pkg, limit: '30m' });
+
+    var entry = { pkg: pkg, limit: '30m', name: PRESETS[pkg] || '' };
+    entries.push(entry);
     dirty = true;
     el.value = '';
     render();
-    toast('已添加 ' + appName(pkg) + '，记得保存');
+
+    if (entry.name) {
+      toast('已添加 ' + entry.name + '，记得保存');
+    } else {
+      toast('已添加，正在识别应用名称…');
+      setTimeout(function () { resolveLabel(entry); }, 60);
+    }
+  }
+
+  // 字典里没有的包名，添加时再问一次设备：先确认装了没有，再看能不能读到应用名。
+  // 系统自带的 pm / dumpsys 都不直接给应用名，只有少数机器带 aapt/aapt2，
+  // 能读到就补上，读不到就保持显示包名，不影响使用。
+  function resolveLabel(entry) {
+    var p = sh("pm path '" + entry.pkg + "' 2>/dev/null");
+    var apk = '';
+    (p.stdout || '').split('\n').forEach(function (l) {
+      var t = l.trim();
+      if (!apk && t.indexOf('package:') === 0) apk = t.slice(8).trim();
+    });
+    if (!apk) {
+      toast('已添加 ' + entry.pkg + '；设备上没装这个应用，识别不了名称');
+      return;
+    }
+
+    var tool = '';
+    var t = sh("command -v aapt2 2>/dev/null || command -v aapt 2>/dev/null");
+    (t.stdout || '').split('\n').forEach(function (l) {
+      var v = l.trim();
+      if (!tool && v) tool = v;
+    });
+
+    if (tool) {
+      var out = (sh("'" + tool + "' d badging '" + apk + "' 2>/dev/null | grep -a 'application-label'").stdout || '');
+      var m = /application-label-zh[^:]*:\s*'([^']*)'/.exec(out) || /application-label:\s*'([^']*)'/.exec(out);
+      if (m && m[1] && m[1] !== 'null') {
+        entry.name = m[1];
+        render();
+        toast('已识别为「' + entry.name + '」，记得保存');
+        return;
+      }
+    }
+
+    var d = (sh("dumpsys package '" + entry.pkg + "' 2>/dev/null | grep -m1 'nonLocalizedLabel='").stdout || '');
+    var m2 = /nonLocalizedLabel=([^\s}]+)/.exec(d);
+    if (m2 && m2[1] && m2[1] !== 'null') {
+      entry.name = m2[1];
+      render();
+      toast('已识别为「' + entry.name + '」，记得保存');
+      return;
+    }
+
+    toast('已添加 ' + entry.pkg + '；系统没提供这个应用的名称，显示包名');
   }
 
   function save() {

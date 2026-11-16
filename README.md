@@ -40,7 +40,7 @@
 ## 界面
 
 <div align="center">  
-  <img src="docs/webui.svg" alt="WebUI" width="360">  
+  <img src="docs/webui.svg" alt="WebUI：主界面与选择应用" width="100%">  
 </div>
 
 WebUI 随模块一同安装，入口文件为 `webroot/index.html`：

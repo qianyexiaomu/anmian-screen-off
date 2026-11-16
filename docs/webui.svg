@@ -1,84 +1,287 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="480" height="900" viewBox="0 0 480 900" role="img" aria-label="WebUI 界面示意">
-  <rect width="480" height="900" fill="#FFFFFF"/>
-  <rect x="20" y="20" width="440" height="860" rx="34" fill="#F5F6F8" stroke="#D1D5DB" stroke-width="1.5"/>
-  <rect x="180" y="34" width="120" height="10" rx="5" fill="#E5E7EB"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="1000" height="980" viewBox="0 0 1000 980" role="img" aria-label="WebUI 界面：主界面与选择应用">
+  <defs>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="10" stdDeviation="14" flood-color="#0f172a" flood-opacity="0.10"/>
+    </filter>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fbbf24"/>
+      <stop offset="1" stop-color="#ea580c"/>
+    </linearGradient>
+    <linearGradient id="dockFade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f5f6f8" stop-opacity="0"/>
+      <stop offset="0.45" stop-color="#f5f6f8" stop-opacity="0.96"/>
+      <stop offset="1" stop-color="#f5f6f8"/>
+    </linearGradient>
+    <clipPath id="leftScreen"><rect x="50" y="50" width="400" height="860" rx="24"/></clipPath>
+    <clipPath id="rightScreen"><rect x="550" y="50" width="400" height="860" rx="24"/></clipPath>
+    <clipPath id="rightList"><rect x="566" y="392" width="334" height="430"/></clipPath>
+  </defs>
 
-  <g font-family="system-ui, -apple-system, 'PingFang SC', 'Microsoft YaHei', sans-serif">
-    <text x="40" y="82" font-size="19" font-weight="600" fill="#1B1D21">短视频息屏管理</text>
-    <rect x="344" y="64" width="96" height="26" rx="13" fill="#E8F5EC"/>
-    <circle cx="360" cy="77" r="4" fill="#15803D"/>
-    <text x="370" y="82" font-size="12" fill="#15803D">运行中</text>
+  <rect width="1000" height="980" fill="#f8fafc"/>
 
-    <rect x="36" y="104" width="408" height="330" rx="14" fill="#FFFFFF" stroke="#E6E8EC"/>
-    <text x="56" y="134" font-size="15" font-weight="500" fill="#1B1D21">已配置应用</text>
-    <rect x="372" y="118" width="52" height="22" rx="11" fill="#EAF0FF"/>
-    <text x="398" y="134" font-size="11.5" fill="#2563EB" text-anchor="middle">2 个</text>
-    <text x="56" y="156" font-size="12" fill="#6B7280">来源：模块配置 · 共 2 个应用</text>
+  <g font-family="system-ui, -apple-system, 'Segoe UI', 'PingFang SC', 'Microsoft YaHei', sans-serif">
+    <!-- ================= 左：主界面 ================= -->
+    <g filter="url(#shadow)">
+      <rect x="40" y="40" width="420" height="880" rx="34" fill="#ffffff" stroke="#d8dbe2" stroke-width="1.5"/>
+    </g>
+    <rect x="50" y="50" width="400" height="860" rx="24" fill="#f5f6f8"/>
+    <g clip-path="url(#leftScreen)">
+      <!-- 状态栏 -->
+      <text x="74" y="78" font-size="11" font-weight="600" fill="#1b1d21">9:41</text>
+      <rect x="396" y="69" width="14" height="9" rx="2" fill="none" stroke="#1b1d21" stroke-width="1.2"/>
+      <rect x="399" y="71.5" width="6" height="4" rx="1" fill="#1b1d21"/>
+      <text x="376" y="78" font-size="10" fill="#1b1d21">5G</text>
 
-    <text x="56" y="186" font-size="14.5" font-weight="500" fill="#1B1D21">抖音</text>
-    <text x="56" y="203" font-size="11.5" fill="#6B7280" font-family="ui-monospace, Consolas, monospace">com.ss.android.ugc.aweme</text>
-    <rect x="300" y="172" width="56" height="26" rx="8" fill="none" stroke="#E6E8EC"/>
-    <text x="328" y="190" font-size="12" fill="#6B7280" text-anchor="middle">置顶</text>
-    <rect x="362" y="172" width="56" height="26" rx="8" fill="none" stroke="#E6E8EC"/>
-    <text x="390" y="190" font-size="12" fill="#DC2626" text-anchor="middle">删除</text>
+      <!-- 页头 -->
+      <text x="70" y="112" font-size="19" font-weight="600" fill="#1b1d21">安眠[息屏管理]</text>
+      <text x="70" y="132" font-size="11.5" fill="#6b7280">配置应用与使用时限</text>
+      <rect x="344" y="95" width="86" height="24" rx="12" fill="#e8f5ec"/>
+      <circle cx="358" cy="107" r="3.5" fill="#15803d"/>
+      <text x="368" y="111" font-size="11" fill="#15803d">运行中</text>
 
-    <rect x="56" y="212" width="38" height="34" rx="9" fill="#F5F6F8" stroke="#E6E8EC"/>
-    <text x="75" y="235" font-size="16" fill="#1B1D21" text-anchor="middle">−</text>
-    <rect x="102" y="212" width="62" height="34" rx="9" fill="#F5F6F8" stroke="#E6E8EC"/>
-    <text x="133" y="235" font-size="14" fill="#1B1D21" text-anchor="middle">30</text>
-    <text x="174" y="235" font-size="12.5" fill="#6B7280">分钟</text>
-    <rect x="228" y="212" width="38" height="34" rx="9" fill="#F5F6F8" stroke="#E6E8EC"/>
-    <text x="247" y="235" font-size="16" fill="#1B1D21" text-anchor="middle">＋</text>
+      <!-- 已配置应用 -->
+      <rect x="66" y="146" width="368" height="378" rx="14" fill="#ffffff" stroke="#e6e8ec"/>
+      <text x="80" y="176" font-size="15" font-weight="600" fill="#1b1d21">已配置应用</text>
+      <rect x="376" y="162" width="44" height="20" rx="10" fill="#eaf0ff"/>
+      <text x="398" y="176" font-size="10.5" fill="#2563eb" text-anchor="middle">2 个</text>
+      <text x="80" y="197" font-size="11" fill="#6b7280">来源：模块配置</text>
 
-    <line x1="56" y1="268" x2="424" y2="268" stroke="#EEF0F3"/>
+      <!-- 抖音 -->
+      <rect x="80" y="208" width="34" height="34" rx="10" fill="#111317"/>
+      <path d="M97 220v13.5a3.4 3.4 0 1 0 2.6 3.3v-9.6c1.5 1.1 3.2 1.7 4.9 1.7v-3.2c-1.9 0-3.5-1-4.3-2.6h-3.2z" fill="#ffffff"/>
+      <path d="M101.5 219.5v10.2" stroke="#22d3ee" stroke-width="1.2" stroke-linecap="round"/>
+      <path d="M104 219.5v9.2" stroke="#f87171" stroke-width="1.2" stroke-linecap="round"/>
+      <text x="124" y="224" font-size="14.5" font-weight="600" fill="#1b1d21">抖音</text>
+      <text x="124" y="240" font-size="10.5" fill="#6b7280" font-family="ui-monospace, Consolas, monospace">com.ss.android.ugc.aweme</text>
+      <text x="384" y="228" font-size="11.5" fill="#6b7280" text-anchor="end">置顶</text>
+      <text x="420" y="228" font-size="11.5" fill="#dc2626" text-anchor="end">删除</text>
 
-    <text x="56" y="294" font-size="14.5" font-weight="500" fill="#1B1D21">快手</text>
-    <text x="56" y="311" font-size="11.5" fill="#6B7280" font-family="ui-monospace, Consolas, monospace">com.smile.gifmaker</text>
-    <rect x="300" y="280" width="56" height="26" rx="8" fill="none" stroke="#E6E8EC"/>
-    <text x="328" y="298" font-size="12" fill="#6B7280" text-anchor="middle">置顶</text>
-    <rect x="362" y="280" width="56" height="26" rx="8" fill="none" stroke="#E6E8EC"/>
-    <text x="390" y="298" font-size="12" fill="#DC2626" text-anchor="middle">删除</text>
+      <!-- 时间行 -->
+      <text x="80" y="271" font-size="11.5" fill="#6b7280">限制</text>
+      <rect x="252" y="252" width="34" height="32" rx="9" fill="#f5f6f8" stroke="#e6e8ec"/>
+      <text x="269" y="273" font-size="15" fill="#1b1d21" text-anchor="middle">−</text>
+      <rect x="292" y="252" width="56" height="32" rx="9" fill="#f5f6f8" stroke="#e6e8ec"/>
+      <text x="320" y="273" font-size="13" fill="#1b1d21" text-anchor="middle" font-family="ui-monospace, Consolas, monospace">30</text>
+      <text x="354" y="273" font-size="11.5" fill="#6b7280">分钟</text>
+      <rect x="386" y="252" width="34" height="32" rx="9" fill="#f5f6f8" stroke="#e6e8ec"/>
+      <text x="403" y="273" font-size="15" fill="#1b1d21" text-anchor="middle">＋</text>
 
-    <rect x="56" y="320" width="38" height="34" rx="9" fill="#F5F6F8" stroke="#E6E8EC"/>
-    <text x="75" y="343" font-size="16" fill="#1B1D21" text-anchor="middle">−</text>
-    <rect x="102" y="320" width="62" height="34" rx="9" fill="#F5F6F8" stroke="#E6E8EC"/>
-    <text x="133" y="343" font-size="14" fill="#1B1D21" text-anchor="middle">15</text>
-    <text x="174" y="343" font-size="12.5" fill="#6B7280">分钟</text>
-    <rect x="228" y="320" width="38" height="34" rx="9" fill="#F5F6F8" stroke="#E6E8EC"/>
-    <text x="247" y="343" font-size="16" fill="#1B1D21" text-anchor="middle">＋</text>
+      <line x1="80" y1="296" x2="420" y2="296" stroke="#eef0f3"/>
 
-    <rect x="56" y="372" width="272" height="40" rx="10" fill="#F5F6F8" stroke="#E6E8EC"/>
-    <text x="70" y="397" font-size="12" fill="#9CA3AF">输入包名，如 com.ss.android.ugc.aweme</text>
-    <rect x="338" y="372" width="86" height="40" rx="10" fill="none" stroke="#2563EB"/>
-    <text x="381" y="397" font-size="13" fill="#2563EB" text-anchor="middle">添加</text>
+      <!-- 光·遇 -->
+      <rect x="80" y="306" width="34" height="34" rx="10" fill="url(#sky)"/>
+      <path d="M87 331c5-8 10-11.5 15.5-11.5-5 2.4-8.2 5.6-9.8 9.6 3.2-2.2 6.3-3.3 9.3-3.3-5.4 3-8.6 6.6-9.6 10.6-2.2-1.4-4.2-3.2-5.4-5.4z" fill="#ffffff" fill-opacity="0.95"/>
+      <text x="124" y="322" font-size="14.5" font-weight="600" fill="#1b1d21">光·遇</text>
+      <text x="124" y="338" font-size="10.5" fill="#6b7280" font-family="ui-monospace, Consolas, monospace">com.netease.sky</text>
+      <text x="384" y="326" font-size="11.5" fill="#6b7280" text-anchor="end">置顶</text>
+      <text x="420" y="326" font-size="11.5" fill="#dc2626" text-anchor="end">删除</text>
 
-    <rect x="36" y="446" width="408" height="252" rx="14" fill="#FFFFFF" stroke="#E6E8EC"/>
-    <text x="56" y="476" font-size="15" font-weight="500" fill="#1B1D21">运行状态</text>
-    <text x="330" y="476" font-size="12" fill="#2563EB">展开日志</text>
-    <text x="384" y="476" font-size="12" fill="#2563EB">刷新</text>
-    <text x="56" y="500" font-size="11.5" fill="#6B7280" font-family="ui-monospace, Consolas, monospace">PID 2318 · 配置每 10 秒检查一次</text>
+      <text x="80" y="369" font-size="11.5" fill="#6b7280">限制</text>
+      <rect x="252" y="350" width="34" height="32" rx="9" fill="#f5f6f8" stroke="#e6e8ec"/>
+      <text x="269" y="371" font-size="15" fill="#1b1d21" text-anchor="middle">−</text>
+      <rect x="292" y="350" width="56" height="32" rx="9" fill="#f5f6f8" stroke="#e6e8ec"/>
+      <text x="320" y="371" font-size="13" fill="#1b1d21" text-anchor="middle" font-family="ui-monospace, Consolas, monospace">45</text>
+      <text x="354" y="371" font-size="11.5" fill="#6b7280">分钟</text>
+      <rect x="386" y="350" width="34" height="32" rx="9" fill="#f5f6f8" stroke="#e6e8ec"/>
+      <text x="403" y="371" font-size="15" fill="#1b1d21" text-anchor="middle">＋</text>
 
-    <rect x="56" y="516" width="172" height="36" rx="10" fill="none" stroke="#E6E8EC"/>
-    <text x="142" y="539" font-size="13" fill="#2563EB" text-anchor="middle">重启</text>
-    <rect x="236" y="516" width="88" height="36" rx="10" fill="none" stroke="#E6E8EC"/>
-    <text x="280" y="539" font-size="13" fill="#2563EB" text-anchor="middle">停止</text>
-    <rect x="332" y="516" width="92" height="36" rx="10" fill="none" stroke="#E6E8EC"/>
-    <text x="378" y="539" font-size="13" fill="#2563EB" text-anchor="middle">诊断</text>
+      <!-- 输入与按钮 -->
+      <rect x="80" y="396" width="272" height="40" rx="10" fill="#f5f6f8" stroke="#e6e8ec"/>
+      <text x="92" y="421" font-size="11" fill="#9ca3af">输入包名，自动识别名称</text>
+      <rect x="360" y="396" width="60" height="40" rx="10" fill="#ffffff" stroke="#2563eb"/>
+      <text x="390" y="421" font-size="12.5" fill="#2563eb" text-anchor="middle">添加</text>
 
-    <rect x="56" y="562" width="178" height="36" rx="10" fill="none" stroke="#E6E8EC"/>
-    <text x="145" y="585" font-size="13" fill="#2563EB" text-anchor="middle">测试息屏</text>
-    <rect x="244" y="562" width="180" height="36" rx="10" fill="none" stroke="#E6E8EC"/>
-    <text x="334" y="585" font-size="13" fill="#2563EB" text-anchor="middle">导出日志</text>
+      <rect x="80" y="446" width="108" height="34" rx="9" fill="#ffffff" stroke="#e6e8ec"/>
+      <text x="134" y="468" font-size="12" fill="#2563eb" text-anchor="middle">选择应用</text>
+      <rect x="196" y="446" width="108" height="34" rx="9" fill="#ffffff" stroke="#e6e8ec"/>
+      <text x="250" y="468" font-size="12" fill="#2563eb" text-anchor="middle">导入备份</text>
+      <rect x="312" y="446" width="108" height="34" rx="9" fill="#ffffff" stroke="#e6e8ec"/>
+      <text x="366" y="468" font-size="12" fill="#2563eb" text-anchor="middle">导出备份</text>
+      <text x="80" y="499" font-size="10.5" fill="#6b7280">换机备份：导出到 Download/配置.prop</text>
 
-    <rect x="56" y="616" width="368" height="58" rx="10" fill="#F0FDF4" stroke="#BBF7D0"/>
-    <text x="68" y="640" font-size="12.5" font-weight="500" fill="#15803D">诊断结论：可用</text>
-    <text x="68" y="659" font-size="11.5" fill="#16A34A">触摸正常 · 前台识别正常 · 屏幕判定正常</text>
+      <!-- 运行状态 -->
+      <rect x="66" y="538" width="368" height="252" rx="14" fill="#ffffff" stroke="#e6e8ec"/>
+      <text x="80" y="568" font-size="15" font-weight="600" fill="#1b1d21">运行状态</text>
+      <text x="420" y="568" font-size="11" fill="#2563eb" text-anchor="end">刷新</text>
+      <text x="386" y="568" font-size="11" fill="#2563eb" text-anchor="end">展开日志</text>
+      <text x="80" y="590" font-size="10.5" fill="#6b7280" font-family="ui-monospace, Consolas, monospace">PID 31827 · 配置每 10 秒检查一次</text>
 
-    <rect x="36" y="716" width="408" height="64" rx="14" fill="#EAF0FF" stroke="#BFD3FF"/>
-    <text x="56" y="745" font-size="12" fill="#2563EB">核心配置</text>
-    <text x="56" y="765" font-size="13" fill="#1E3A8A">抖音 30 分钟 · 快手 15 分钟</text>
+      <rect x="80" y="602" width="104" height="32" rx="9" fill="#ffffff" stroke="#e6e8ec"/>
+      <text x="132" y="623" font-size="12" fill="#2563eb" text-anchor="middle">重启</text>
+      <rect x="192" y="602" width="84" height="32" rx="9" fill="#ffffff" stroke="#e6e8ec"/>
+      <text x="234" y="623" font-size="12" fill="#2563eb" text-anchor="middle">停止</text>
+      <rect x="284" y="602" width="100" height="32" rx="9" fill="#ffffff" stroke="#e6e8ec"/>
+      <text x="334" y="623" font-size="12" fill="#2563eb" text-anchor="middle">诊断</text>
 
-    <rect x="36" y="800" width="408" height="48" rx="12" fill="#2563EB"/>
-    <text x="240" y="830" font-size="15" font-weight="500" fill="#FFFFFF" text-anchor="middle">保存配置</text>
+      <rect x="80" y="642" width="110" height="32" rx="9" fill="#ffffff" stroke="#e6e8ec"/>
+      <text x="135" y="663" font-size="12" fill="#2563eb" text-anchor="middle">测试息屏</text>
+      <rect x="198" y="642" width="110" height="32" rx="9" fill="#ffffff" stroke="#e6e8ec"/>
+      <text x="253" y="663" font-size="12" fill="#2563eb" text-anchor="middle">导出日志</text>
+
+      <rect x="80" y="688" width="340" height="54" rx="10" fill="#f0fdf4" stroke="#bbf7d0"/>
+      <text x="92" y="710" font-size="11.5" font-weight="600" fill="#15803d">诊断结论：可用</text>
+      <text x="92" y="728" font-size="10.5" fill="#16a34a">触摸正常 · 前台识别正常 · 屏幕判定正常</text>
+      <text x="92" y="766" font-size="9.5" fill="#9ca3af" font-family="ui-monospace, Consolas, monospace">[I] 开始跟踪 抖音（限制 1800 秒）</text>
+
+      <!-- 底部固定栏 -->
+      <rect x="50" y="800" width="400" height="110" fill="url(#dockFade)"/>
+      <rect x="66" y="836" width="368" height="44" rx="12" fill="#2563eb"/>
+      <text x="250" y="863" font-size="14.5" font-weight="600" fill="#ffffff" text-anchor="middle">保存配置</text>
+      <rect x="190" y="892" width="120" height="4" rx="2" fill="#c7ccd4"/>
+    </g>
+
+    <!-- ================= 右：选择应用 ================= -->
+    <g filter="url(#shadow)">
+      <rect x="540" y="40" width="420" height="880" rx="34" fill="#ffffff" stroke="#d8dbe2" stroke-width="1.5"/>
+    </g>
+    <rect x="550" y="50" width="400" height="860" rx="24" fill="#f5f6f8"/>
+    <g clip-path="url(#rightScreen)">
+      <text x="574" y="78" font-size="11" font-weight="600" fill="#1b1d21">9:41</text>
+      <rect x="896" y="69" width="14" height="9" rx="2" fill="none" stroke="#1b1d21" stroke-width="1.2"/>
+      <rect x="899" y="71.5" width="6" height="4" rx="1" fill="#1b1d21"/>
+      <text x="876" y="78" font-size="10" fill="#1b1d21">5G</text>
+
+      <text x="566" y="112" font-size="19" font-weight="600" fill="#1b1d21">安眠[息屏管理]</text>
+      <text x="566" y="132" font-size="11.5" fill="#6b7280">配置应用与使用时限</text>
+      <rect x="840" y="95" width="86" height="24" rx="12" fill="#e8f5ec"/>
+      <circle cx="854" cy="107" r="3.5" fill="#15803d"/>
+      <text x="864" y="111" font-size="11" fill="#15803d">运行中</text>
+
+      <rect x="566" y="146" width="368" height="690" rx="14" fill="#ffffff" stroke="#e6e8ec"/>
+      <text x="580" y="176" font-size="15" font-weight="600" fill="#1b1d21">已配置应用</text>
+      <rect x="876" y="162" width="44" height="20" rx="10" fill="#eaf0ff"/>
+      <text x="898" y="176" font-size="10.5" fill="#2563eb" text-anchor="middle">2 个</text>
+      <text x="580" y="197" font-size="11" fill="#6b7280">来源：模块配置</text>
+
+      <!-- 已配置条目（紧凑） -->
+      <rect x="580" y="208" width="34" height="34" rx="10" fill="#111317"/>
+      <path d="M597 220v13.5a3.4 3.4 0 1 0 2.6 3.3v-9.6c1.5 1.1 3.2 1.7 4.9 1.7v-3.2c-1.9 0-3.5-1-4.3-2.6h-3.2z" fill="#ffffff"/>
+      <text x="624" y="224" font-size="14.5" font-weight="600" fill="#1b1d21">抖音</text>
+      <text x="624" y="240" font-size="10.5" fill="#6b7280" font-family="ui-monospace, Consolas, monospace">com.ss.android.ugc.aweme</text>
+      <text x="884" y="228" font-size="11.5" fill="#6b7280" text-anchor="end">置顶</text>
+      <text x="920" y="228" font-size="11.5" fill="#dc2626" text-anchor="end">删除</text>
+
+      <text x="580" y="271" font-size="11.5" fill="#6b7280">限制</text>
+      <rect x="752" y="252" width="34" height="32" rx="9" fill="#f5f6f8" stroke="#e6e8ec"/>
+      <text x="769" y="273" font-size="15" fill="#1b1d21" text-anchor="middle">−</text>
+      <rect x="792" y="252" width="56" height="32" rx="9" fill="#f5f6f8" stroke="#e6e8ec"/>
+      <text x="820" y="273" font-size="13" fill="#1b1d21" text-anchor="middle" font-family="ui-monospace, Consolas, monospace">30</text>
+      <text x="854" y="273" font-size="11.5" fill="#6b7280">分钟</text>
+      <rect x="886" y="252" width="34" height="32" rx="9" fill="#f5f6f8" stroke="#e6e8ec"/>
+      <text x="903" y="273" font-size="15" fill="#1b1d21" text-anchor="middle">＋</text>
+      <line x1="580" y1="296" x2="920" y2="296" stroke="#eef0f3"/>
+
+      <!-- 选择器 -->
+      <text x="580" y="320" font-size="12.5" font-weight="600" fill="#1b1d21">已安装应用</text>
+      <text x="650" y="320" font-size="10.5" fill="#6b7280">· 共 710 个</text>
+      <text x="920" y="320" font-size="11" fill="#2563eb" text-anchor="end">重新读取</text>
+
+      <rect x="580" y="330" width="322" height="36" rx="10" fill="#f5f6f8" stroke="#e6e8ec"/>
+      <text x="592" y="353" font-size="11" fill="#9ca3af">搜索应用名或包名</text>
+      <text x="580" y="384" font-size="10.5" fill="#6b7280">共 710 个应用</text>
+
+      <g clip-path="url(#rightList)">
+        <!-- # 组 -->
+        <text x="580" y="410" font-size="9.5" font-weight="600" fill="#9ca3af" letter-spacing="0.6">#</text>
+        <!-- 123 云盘 -->
+        <rect x="580" y="418" width="30" height="30" rx="9" fill="#2563eb"/>
+        <text x="595" y="438" font-size="8.5" font-weight="600" fill="#ffffff" text-anchor="middle">123</text>
+        <text x="618" y="432" font-size="12.5" fill="#1b1d21">123 云盘</text>
+        <text x="618" y="446" font-size="9.5" fill="#6b7280" font-family="ui-monospace, Consolas, monospace">com.anyshare.cloud</text>
+        <rect x="846" y="423" width="50" height="22" rx="11" fill="#ffffff" stroke="#e6e8ec"/>
+        <text x="871" y="438" font-size="10" fill="#2563eb" text-anchor="middle">添加</text>
+
+        <!-- 1DM+ -->
+        <rect x="580" y="462" width="30" height="30" rx="9" fill="#0ea5e9"/>
+        <path d="M595 469v11m0 0 4-4m-4 4-4-4M589 483h12" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <text x="618" y="476" font-size="12.5" fill="#1b1d21">1DM+</text>
+        <text x="618" y="490" font-size="9.5" fill="#6b7280" font-family="ui-monospace, Consolas, monospace">idm.internet.download.manager</text>
+        <rect x="846" y="467" width="50" height="22" rx="11" fill="#ffffff" stroke="#e6e8ec"/>
+        <text x="871" y="482" font-size="10" fill="#2563eb" text-anchor="middle">添加</text>
+
+        <!-- A 组 -->
+        <text x="580" y="520" font-size="9.5" font-weight="600" fill="#9ca3af" letter-spacing="0.6">A</text>
+        <!-- 爱奇艺 -->
+        <rect x="580" y="528" width="30" height="30" rx="9" fill="#22c55e"/>
+        <path d="M592 536l12 7-12 7z" fill="#ffffff"/>
+        <text x="618" y="542" font-size="12.5" fill="#1b1d21">爱奇艺</text>
+        <text x="618" y="556" font-size="9.5" fill="#6b7280" font-family="ui-monospace, Consolas, monospace">com.qiyi.video</text>
+        <rect x="846" y="533" width="50" height="22" rx="11" fill="#ffffff" stroke="#e6e8ec"/>
+        <text x="871" y="548" font-size="10" fill="#2563eb" text-anchor="middle">添加</text>
+
+        <!-- B 组 -->
+        <text x="580" y="586" font-size="9.5" font-weight="600" fill="#9ca3af" letter-spacing="0.6">B</text>
+        <!-- 哔哩哔哩 -->
+        <rect x="580" y="594" width="30" height="30" rx="9" fill="#fb7299"/>
+        <path d="M591 601l3 3M599 601l-3 3" stroke="#ffffff" stroke-width="1.4" stroke-linecap="round"/>
+        <rect x="590" y="605" width="10" height="8" rx="2" fill="none" stroke="#ffffff" stroke-width="1.5"/>
+        <text x="618" y="608" font-size="12.5" fill="#1b1d21">哔哩哔哩</text>
+        <text x="618" y="622" font-size="9.5" fill="#6b7280" font-family="ui-monospace, Consolas, monospace">tv.danmaku.bili</text>
+        <rect x="846" y="599" width="50" height="22" rx="11" fill="#ffffff" stroke="#e6e8ec"/>
+        <text x="871" y="614" font-size="10" fill="#2563eb" text-anchor="middle">添加</text>
+
+        <!-- D 组 -->
+        <text x="580" y="652" font-size="9.5" font-weight="600" fill="#9ca3af" letter-spacing="0.6">D</text>
+        <!-- 抖音（已添加） -->
+        <rect x="580" y="660" width="30" height="30" rx="9" fill="#111317"/>
+        <path d="M595 670v10a2.8 2.8 0 1 0 2.2 2.7v-7.4c1.2.9 2.6 1.4 4 1.4v-2.7c-1.5 0-2.8-.8-3.5-2.1h-2.7z" fill="#ffffff"/>
+        <text x="618" y="674" font-size="12.5" fill="#1b1d21">抖音</text>
+        <text x="618" y="688" font-size="9.5" fill="#6b7280" font-family="ui-monospace, Consolas, monospace">com.ss.android.ugc.aweme</text>
+        <rect x="846" y="665" width="50" height="22" rx="11" fill="none" stroke="#cbd0d8" stroke-dasharray="3 2"/>
+        <text x="871" y="680" font-size="10" fill="#9ca3af" text-anchor="middle">已添加</text>
+
+        <!-- 抖音极速版 -->
+        <rect x="580" y="704" width="30" height="30" rx="9" fill="#1f2937"/>
+        <path d="M595 714v10a2.8 2.8 0 1 0 2.2 2.7v-7.4c1.2.9 2.6 1.4 4 1.4v-2.7c-1.5 0-2.8-.8-3.5-2.1h-2.7z" fill="#ffffff"/>
+        <text x="618" y="718" font-size="12.5" fill="#1b1d21">抖音极速版</text>
+        <text x="618" y="732" font-size="9.5" fill="#6b7280" font-family="ui-monospace, Consolas, monospace">com.ss.android.ugc.aweme.lite</text>
+        <rect x="846" y="709" width="50" height="22" rx="11" fill="#ffffff" stroke="#e6e8ec"/>
+        <text x="871" y="724" font-size="10" fill="#2563eb" text-anchor="middle">添加</text>
+
+        <!-- K 组 -->
+        <text x="580" y="762" font-size="9.5" font-weight="600" fill="#9ca3af" letter-spacing="0.6">K</text>
+        <!-- 快手 -->
+        <rect x="580" y="770" width="30" height="30" rx="9" fill="#f97316"/>
+        <rect x="589" y="779" width="11" height="12" rx="3" fill="none" stroke="#ffffff" stroke-width="1.6"/>
+        <circle cx="597.5" cy="785" r="2.4" fill="#ffffff"/>
+        <text x="618" y="784" font-size="12.5" fill="#1b1d21">快手</text>
+        <text x="618" y="798" font-size="9.5" fill="#6b7280" font-family="ui-monospace, Consolas, monospace">com.smile.gifmaker</text>
+        <rect x="846" y="775" width="50" height="22" rx="11" fill="#ffffff" stroke="#e6e8ec"/>
+        <text x="871" y="790" font-size="10" fill="#2563eb" text-anchor="middle">添加</text>
+      </g>
+
+      <!-- 字母索引 -->
+      <g font-size="9.5" fill="#9ca3af" text-anchor="middle">
+        <text x="908" y="406" font-size="9" font-weight="700" fill="#2563eb">全</text>
+        <text x="908" y="428">#</text>
+        <text x="908" y="450">A</text>
+        <text x="908" y="472">B</text>
+        <text x="908" y="494">C</text>
+        <text x="908" y="516">D</text>
+        <text x="908" y="538">E</text>
+        <text x="908" y="560">F</text>
+        <text x="908" y="582">G</text>
+        <text x="908" y="604">H</text>
+        <text x="908" y="626">J</text>
+        <text x="908" y="648">K</text>
+        <text x="908" y="670">L</text>
+        <text x="908" y="692">M</text>
+        <text x="908" y="714">N</text>
+        <text x="908" y="736">P</text>
+        <text x="908" y="758">Q</text>
+        <text x="908" y="780">S</text>
+        <text x="908" y="802">T</text>
+        <text x="908" y="824">W</text>
+      </g>
+
+      <!-- 底部固定栏 -->
+      <rect x="550" y="800" width="400" height="110" fill="url(#dockFade)"/>
+      <rect x="566" y="836" width="368" height="44" rx="12" fill="#2563eb"/>
+      <text x="750" y="863" font-size="14.5" font-weight="600" fill="#ffffff" text-anchor="middle">保存配置</text>
+      <rect x="690" y="892" width="120" height="4" rx="2" fill="#c7ccd4"/>
+    </g>
+
+    <text x="250" y="952" font-size="12.5" fill="#6b7280" text-anchor="middle">主界面</text>
+    <text x="750" y="952" font-size="12.5" fill="#6b7280" text-anchor="middle">选择应用 · 全部应用与字母索引</text>
   </g>
 </svg>
